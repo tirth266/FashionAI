@@ -3,9 +3,9 @@ flask-cors
 pymongo
 dnspython
 pyjwt
+--index-url https://download.pytorch.org/whl/cpu
 torch
 torchvision
-torchaudio
 pillow
 numpy
 pandas

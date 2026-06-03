@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 class FAISSIndex:
-    def __init__(self, dimension=3024):
+    def __init__(self, dimension=440):
         self.dimension = dimension
         # L2 distance index (can be used for inner product if normalized)
         self.index = faiss.IndexFlatIP(dimension) 

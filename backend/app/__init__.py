@@ -22,6 +22,6 @@ def create_app():
 
     @app.route('/health')
     def health_check():
-        return {"status": "healthy", "model": "RegNetY-16GF active"}, 200
+        return {"status": "healthy", "model": "RegNetY-400MF active"}, 200
 
     return app
