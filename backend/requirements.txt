@@ -14,3 +14,4 @@ faiss-cpu
 gunicorn
 python-dotenv
 werkzeug
+opencv-python-headless
