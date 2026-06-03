@@ -1,0 +1,16 @@
+flask
+flask-cors
+pymongo
+dnspython
+pyjwt
+torch
+torchvision
+torchaudio
+pillow
+numpy
+pandas
+scikit-learn
+faiss-cpu
+gunicorn
+python-dotenv
+werkzeug

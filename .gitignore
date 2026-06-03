@@ -1,0 +1,57 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Build Artifacts
+dist/
+build/
+*.pyc
+__pycache__/
+
+# AI / Machine Learning
+uploads/
+dataset/
+saved_models/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.weights
+*.h5
+*.pb
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+include/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Project Specific
+FASHION_PLATFORM_ARCHITECTURE.md
+backend-node/uploads/
+backend/uploads/
+backend/temp_uploads/
+frontend/dist/
