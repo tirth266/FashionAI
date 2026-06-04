@@ -47,14 +47,21 @@ export const AuthProvider = ({ children }) => {
     try {
       // Robust URL construction: ensures we hit /api/auth/google regardless of VITE_API_URL suffix
       const rootUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '').replace(/\/$/, '');
-      const response = await axios.post(`${rootUrl}/api/auth/google`, { token: credential });
+      const googleAuthUrl = `${rootUrl}/api/auth/google`;
+      
+      console.log('Sending Google Token to Backend:', googleAuthUrl);
+      
+      const response = await axios.post(googleAuthUrl, { token: credential });
       const { user, token: newToken } = response.data;
+      
+      console.log('Backend authentication successful');
       
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(user);
       return { success: true };
     } catch (error) {
+      console.error('Backend authentication failed:', error.response?.data || error.message);
       return {
         success: false,
         message: error.response?.data?.message || 'Google login failed'

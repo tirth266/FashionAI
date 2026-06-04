@@ -10,15 +10,16 @@ export const SocialLogin = () => {
 
   const handleSuccess = async (credentialResponse) => {
     try {
-      console.log('Google Login Triggered');
+      console.log('Google Login SUCCESS: Received credential from GIS');
       const result = await googleLogin(credentialResponse.credential);
       if (result.success) {
+        console.log('Google Login SUCCESS: Backend authenticated');
         navigate(ROUTES.DASHBOARD);
       } else {
-        console.error('Google Auth Failed in Context:', result.message);
+        console.error('Google Login FAILED: Backend rejected token', result.message);
       }
     } catch (error) {
-      console.error('SocialLogin Error Catch:', error);
+      console.error('Google Login EXCEPTION: Error during flow', error);
     }
   };
 
@@ -40,11 +41,11 @@ export const SocialLogin = () => {
             onError={() => {
               console.error('Google Sign-In Error: Popup closed or failed to initialize.');
             }}
-            useOneTap
+            useOneTap={false} // Avoid duplicate triggers from One Tap
             theme="filled_black"
             shape="pill"
             text="signin_with"
-            width="100%"
+            width="320" // Numeric width instead of 100%
           />
         </div>
       </div>
