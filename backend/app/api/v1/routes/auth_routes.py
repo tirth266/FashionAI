@@ -1,14 +1,12 @@
 from flask import Blueprint, jsonify, request
 from google.oauth2 import id_token
 from google.auth.transport import requests
-import os
 from app.models.user_model import User
 from app.core.security import create_token
+from app.core.config import Config
 from app.middleware.auth_middleware import token_required
 
 auth_bp = Blueprint('auth_bp', __name__)
-
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -48,10 +46,19 @@ def login():
 
 @auth_bp.route('/google', methods=['POST'])
 def google_auth():
-    token = request.json.get('token')
+    data = request.get_json()
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({"message": "No Google token provided"}), 400
+
     try:
-        # Verify Google Token
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+        # Use Config.GOOGLE_CLIENT_ID to ensure it's loaded from .env/environment
+        idinfo = id_token.verify_oauth2_token(
+            token, 
+            requests.Request(), 
+            Config.GOOGLE_CLIENT_ID
+        )
 
         email = idinfo['email']
         google_id = idinfo['sub']
@@ -88,8 +95,12 @@ def google_auth():
             "token": jwt_token
         }), 200
 
-    except ValueError:
-        return jsonify({"message": "Invalid Google token"}), 400
+    except ValueError as e:
+        print(f"Google Token Validation Error: {str(e)}")
+        return jsonify({"message": "Invalid Google token", "error": str(e)}), 400
+    except Exception as e:
+        print(f"Google Auth Error: {str(e)}")
+        return jsonify({"message": "Authentication failed", "error": str(e)}), 500
 
 @auth_bp.route('/me', methods=['GET'])
 @token_required

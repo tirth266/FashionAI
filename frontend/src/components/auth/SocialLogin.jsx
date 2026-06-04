@@ -9,9 +9,16 @@ export const SocialLogin = () => {
   const navigate = useNavigate();
 
   const handleSuccess = async (credentialResponse) => {
-    const result = await googleLogin(credentialResponse.credential);
-    if (result.success) {
-      navigate(ROUTES.DASHBOARD);
+    try {
+      console.log('Google Login Triggered');
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        navigate(ROUTES.DASHBOARD);
+      } else {
+        console.error('Google Auth Failed in Context:', result.message);
+      }
+    } catch (error) {
+      console.error('SocialLogin Error Catch:', error);
     }
   };
 
@@ -27,15 +34,16 @@ export const SocialLogin = () => {
       </div>
 
       <div className="mt-6 flex flex-col items-center gap-3">
-        <div className="w-full flex justify-center">
+        <div className="w-full flex justify-center min-h-[40px]">
           <GoogleLogin
             onSuccess={handleSuccess}
             onError={() => {
-              console.log('Login Failed');
+              console.error('Google Sign-In Error: Popup closed or failed to initialize.');
             }}
             useOneTap
             theme="filled_black"
-            shape="circle"
+            shape="pill"
+            text="signin_with"
             width="100%"
           />
         </div>
