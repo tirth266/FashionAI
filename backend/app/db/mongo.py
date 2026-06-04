@@ -6,7 +6,9 @@ load_dotenv()
 
 class MongoDB:
     def __init__(self):
-        self.uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/fashion_db")
+        self.uri = os.getenv("MONGO_URI")
+        if not self.uri:
+            raise ValueError("MONGO_URI environment variable is not set")
         self.client = MongoClient(self.uri)
         self.db = self.client.get_database()
 

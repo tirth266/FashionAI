@@ -1,7 +1,20 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 
 export const SocialLogin = () => {
+  const { googleLogin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSuccess = async (credentialResponse) => {
+    const result = await googleLogin(credentialResponse.credential);
+    if (result.success) {
+      navigate(ROUTES.DASHBOARD);
+    }
+  };
+
   return (
     <div className="mt-6">
       <div className="relative">
@@ -13,26 +26,20 @@ export const SocialLogin = () => {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full inline-flex justify-center py-2.5 px-4 border border-white/10 rounded-xl bg-white/5 text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
-        >
-          <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
-          Google
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full inline-flex justify-center py-2.5 px-4 border border-white/10 rounded-xl bg-white/5 text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
-        >
-          <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/511330/apple-173.svg" alt="Apple" />
-          Apple
-        </motion.button>
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={() => {
+              console.log('Login Failed');
+            }}
+            useOneTap
+            theme="filled_black"
+            shape="circle"
+            width="100%"
+          />
+        </div>
       </div>
     </div>
   );
 };
-

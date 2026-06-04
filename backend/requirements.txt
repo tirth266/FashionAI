@@ -15,3 +15,4 @@ gunicorn
 python-dotenv
 werkzeug
 opencv-python-headless
+google-auth
