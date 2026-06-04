@@ -1,7 +1,9 @@
 import axios from 'axios'
 
-// In production (Vercel), VITE_API_BASE_URL should be set to your Render URL + /api
-// e.g., https://fashion-ai-backend.onrender.com/api
+/**
+ * PRODUCTION SETUP:
+ * VITE_API_BASE_URL should be set in Vercel to: https://your-backend.onrender.com/api
+ */
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
@@ -11,6 +13,18 @@ const api = axios.create({
   }
 })
 
+// Global error handler for axios
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Prevent the browser from trying to navigate to the failed URL
+    if (error.response && error.response.status === 404) {
+      console.error('API Endpoint not found:', error.config.url);
+    }
+    return Promise.reject(error);
+  }
+);
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -18,13 +32,5 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
-
-// Log outgoing requests in development to help debug 404s
-if (import.meta.env.DEV) {
-  api.interceptors.request.use(request => {
-    console.log('Starting Request', request.method.toUpperCase(), request.baseURL + request.url)
-    return request
-  })
-}
 
 export default api
