@@ -1,43 +1,44 @@
 import axios from 'axios'
 
 /**
- * API SERVICE CONFIGURATION
+ * CENTRALIZED API CONFIGURATION
  * 
- * In Production (Vercel):
- * VITE_API_BASE_URL must be set to your Render URL + /api
- * Example: https://fashionai-backend-yzqb.onrender.com/api
+ * Ensures all requests target the correct backend (Local vs Render)
+ * based on the VITE_API_BASE_URL environment variable.
  */
 
-let baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Safety: Clean up URL if it ends with a slash to prevent double slashes in paths
-if (baseURL.endsWith('/')) {
-  baseURL = baseURL.slice(0, -1);
+// Debugging log (Visible in browser console)
+console.log("DEBUG: Initializing API with VITE_API_BASE_URL =", VITE_API_BASE_URL);
+
+if (!VITE_API_BASE_URL && import.meta.env.PROD) {
+  console.error("FATAL ERROR: VITE_API_BASE_URL is not configured in Vercel.");
 }
 
+const baseURL = VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-// Global response interceptor
+// Add global response error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log detailed errors in development
-    if (import.meta.env.DEV) {
-      console.error('API Error:', error.response?.status, error.config?.url);
-    }
-
-    // Standardize error object
+    const originalRequest = error.config;
+    console.error(`API ERROR [${originalRequest.method.toUpperCase()}] ${originalRequest.url}:`, error.message);
+    
+    // Standardize error format for the application
     const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
     return Promise.reject({ ...error, message });
   }
 );
 
-// Global request interceptor for JWT
+// Add global request interceptor for JWT authentication
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {

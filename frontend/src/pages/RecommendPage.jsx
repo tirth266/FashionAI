@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
 import UploadImage from '../components/recommendation/UploadImage';
@@ -35,7 +35,7 @@ export const RecommendPage = () => {
     formData.append('image', selectedImage);
 
     try {
-      const response = await axios.post('/api/recommendations/recommend', formData, {
+      const response = await api.post('/recommendations/recommend', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
