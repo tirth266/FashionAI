@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -7,8 +7,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Strict CORS for production safety
-CORS(app, resources={r"/api/*": {
+# Apply CORS to ALL routes (/*) to prevent "Unsafe attempt" errors on root/redirects
+CORS(app, resources={r"/*": {
     "origins": [
         "http://localhost:5173",
         "https://fashion-ai-frontend.vercel.app", 
@@ -27,10 +27,17 @@ from app.api.recommendations import recommendations_bp
 from app.api.uploads import uploads_bp
 from app.api.v1.routes.auth_routes import auth_bp
 
-# Note: Blueprints themselves may have prefixes, we consolidate them here.
 app.register_blueprint(recommendations_bp, url_prefix='/api')
 app.register_blueprint(uploads_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
+
+@app.route('/')
+def index():
+    return jsonify({
+        "name": "Fashion AI API",
+        "status": "healthy",
+        "endpoints": ["/api/auth", "/api/recommend", "/api/upload-image"]
+    }), 200
 
 @app.route('/health')
 def health_check():
