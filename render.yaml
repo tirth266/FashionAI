@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ai-trading-platform-backend
+    name: fashion-ai-backend
     env: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -11,4 +11,8 @@ services:
       - key: MONGO_URI
         sync: false
       - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
         sync: false

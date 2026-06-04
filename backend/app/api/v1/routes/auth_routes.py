@@ -52,8 +52,13 @@ def google_auth():
     if not token:
         return jsonify({"message": "No Google token provided"}), 400
 
+    if not Config.GOOGLE_CLIENT_ID:
+        print("ERROR: GOOGLE_CLIENT_ID is not configured in backend.")
+        return jsonify({"message": "Backend configuration error: Missing Google Client ID"}), 500
+
     try:
         # Use Config.GOOGLE_CLIENT_ID to ensure it's loaded from .env/environment
+        print(f"Verifying token with Client ID: {Config.GOOGLE_CLIENT_ID[:10]}...")
         idinfo = id_token.verify_oauth2_token(
             token, 
             requests.Request(), 
@@ -62,8 +67,10 @@ def google_auth():
 
         email = idinfo['email']
         google_id = idinfo['sub']
-        name = idinfo.get('name')
+        name = idinfo.get('name', email.split('@')[0])
         picture = idinfo.get('picture')
+
+        print(f"Token verified for email: {email}")
 
         user = User.find_by_google_id(google_id)
 

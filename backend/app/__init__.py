@@ -6,8 +6,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-# Restrict CORS to specific domains in production, or allow all for dev
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Enhanced CORS for production
+CORS(app, resources={r"/*": {
+    "origins": [
+        "http://localhost:5173",
+        "https://fashion-ai-frontend.vercel.app", # Add your actual Vercel URL here
+        "https://*.vercel.app"
+    ],
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}})
+
+if not os.getenv("GOOGLE_CLIENT_ID"):
+    print("WARNING: GOOGLE_CLIENT_ID not set. Google Auth will fail.")
 
 # Configuration
 # Use /tmp for serverless environments or an environment variable
