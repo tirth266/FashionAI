@@ -7,16 +7,20 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Apply CORS to ALL routes (/*) to prevent "Unsafe attempt" errors on root/redirects
-CORS(app, resources={r"/*": {
-    "origins": [
-        "http://localhost:5173",
-        "https://fashion-ai-frontend.vercel.app", 
-        "https://*.vercel.app"
+# Apply production-ready CORS configuration
+CORS(
+    app,
+    origins=[
+        "https://fashion-ai-sand.vercel.app",
+        "http://localhost:5173"
     ],
-    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", "Authorization"]
-}})
+    supports_credentials=True,
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization"
+    ]
+)
 
 # Configuration
 app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', '/tmp/uploads')
@@ -30,6 +34,11 @@ from app.api.v1.routes.auth_routes import auth_bp
 app.register_blueprint(recommendations_bp, url_prefix='/api')
 app.register_blueprint(uploads_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+    return response
 
 @app.route('/')
 def index():
