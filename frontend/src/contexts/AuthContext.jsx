@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 import api from '../services/api';
 
 const AuthContext = createContext();
@@ -44,7 +45,9 @@ export const AuthProvider = ({ children }) => {
 
   const googleLogin = async (credential) => {
     try {
-      const response = await api.post('/auth/google', { token: credential });
+      // Robust URL construction: ensures we hit /api/auth/google regardless of VITE_API_URL suffix
+      const rootUrl = import.meta.env.VITE_API_URL.replace(/\/api$/, '').replace(/\/$/, '');
+      const response = await axios.post(`${rootUrl}/api/auth/google`, { token: credential });
       const { user, token: newToken } = response.data;
       
       localStorage.setItem('token', newToken);

@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/response.js';
+import { config } from '../config/index.js';
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, config.jwtSecret, {
     expiresIn: '30d',
   });
 };

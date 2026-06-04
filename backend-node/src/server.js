@@ -1,16 +1,20 @@
 import dotenv from 'dotenv';
 import app from './app.js';
 import connectDB from './config/db.js';
+import { config, validateEnv } from './config/index.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+// Validate Environment Variables
+validateEnv();
+
+const PORT = config.port;
 
 // Connect to Database
 connectDB();
 
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`🚀 Server running in ${config.nodeEnv} mode on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections

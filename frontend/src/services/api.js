@@ -1,25 +1,16 @@
 import axios from 'axios'
 
-/**
- * CENTRALIZED API CONFIGURATION
- * 
- * Ensures all requests target the correct backend (Local vs Render)
- * based on the VITE_API_BASE_URL environment variable.
- */
+const API_URL = import.meta.env.VITE_API_URL;
 
-const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-// Debugging log (Visible in browser console)
-console.log("DEBUG: Initializing API with VITE_API_BASE_URL =", VITE_API_BASE_URL);
-
-if (!VITE_API_BASE_URL && import.meta.env.PROD) {
-  console.error("FATAL ERROR: VITE_API_BASE_URL is not configured in Vercel.");
+if (!API_URL) {
+  throw new Error("VITE_API_URL is not configured");
 }
 
-const baseURL = VITE_API_BASE_URL || 'http://localhost:5000/api';
+// Ensure baseURL consistently includes the /api prefix
+const baseURL = API_URL.endsWith('/api') ? API_URL : `${API_URL.replace(/\/$/, '')}/api`;
 
-const api = axios.create({
-  baseURL: baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL,
+export const api = axios.create({
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json'
   }

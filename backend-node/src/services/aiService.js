@@ -1,16 +1,21 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
+import { config } from '../config/index.js';
 
 /**
  * Calls the external Python AI service to get recommendations based on an image.
  */
 export const getAiRecommendations = async (imagePath) => {
+  if (!config.aiServiceUrl) {
+    throw new Error("AI_SERVICE_URL is not configured");
+  }
+
   try {
     const formData = new FormData();
     formData.append('image', fs.createReadStream(imagePath));
 
-    const response = await axios.post('http://localhost:5000/api/recommend', formData, {
+    const response = await axios.post(`${config.aiServiceUrl}/api/recommend`, formData, {
       headers: {
         ...formData.getHeaders(),
       },

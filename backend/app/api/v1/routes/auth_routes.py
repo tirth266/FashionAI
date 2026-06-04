@@ -46,54 +46,50 @@ def login():
 
 @auth_bp.route('/google', methods=['POST'])
 def google_auth():
-    data = request.get_json()
-    token = data.get('token')
-    
-    if not token:
-        return jsonify({"message": "No Google token provided"}), 400
-
-    if not Config.GOOGLE_CLIENT_ID:
-        print("ERROR: GOOGLE_CLIENT_ID is not configured in backend.")
-        return jsonify({"message": "Backend configuration error: Missing Google Client ID"}), 500
-
     try:
-        # Use Config.GOOGLE_CLIENT_ID to ensure it's loaded from .env/environment
-        print(f"Verifying token with Client ID: {Config.GOOGLE_CLIENT_ID[:10]}...")
-        idinfo = id_token.verify_oauth2_token(
-            token, 
-            requests.Request(), 
-            Config.GOOGLE_CLIENT_ID
-        )
+        data = request.get_json()
+        token = data.get('token')
+        
+        if not token:
+            return jsonify({"success": False, "message": "No Google token provided"}), 400
+
+        if not Config.GOOGLE_CLIENT_ID:
+            logger.error("GOOGLE_CLIENT_ID is not configured in backend.")
+            return jsonify({"success": False, "message": "Backend configuration error: Missing Google Client ID"}), 500
+
+        # Token verification logic
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token, 
+                requests.Request(), 
+                Config.GOOGLE_CLIENT_ID
+            )
+        except ValueError as ve:
+            return jsonify({"success": False, "message": "Invalid Google token", "error": str(ve)}), 400
 
         email = idinfo['email']
         google_id = idinfo['sub']
         name = idinfo.get('name', email.split('@')[0])
         picture = idinfo.get('picture')
 
-        print(f"Token verified for email: {email}")
-
         user = User.find_by_google_id(google_id)
 
         if not user:
-            # Check if user exists with email but no google_id
             user = User.find_by_email(email)
             if user:
-                # Link google account
                 User.update_profile(user['_id'], {
                     "google_id": google_id,
                     "profile_picture": picture,
                     "auth_provider": "google"
                 })
             else:
-                # Create new user
                 User.create(email, google_id=google_id, name=name, profile_picture=picture, auth_provider="google")
-            
             user = User.find_by_email(email)
 
-        # Create JWT
         jwt_token = create_token({"user_id": str(user['_id']), "email": user['email']})
 
         return jsonify({
+            "success": True,
             "user": {
                 "email": user['email'],
                 "name": user.get('name'),
@@ -102,12 +98,13 @@ def google_auth():
             "token": jwt_token
         }), 200
 
-    except ValueError as e:
-        print(f"Google Token Validation Error: {str(e)}")
-        return jsonify({"message": "Invalid Google token", "error": str(e)}), 400
     except Exception as e:
-        print(f"Google Auth Error: {str(e)}")
-        return jsonify({"message": "Authentication failed", "error": str(e)}), 500
+        logger.error(f"Google Auth Exception: {str(e)}")
+        return jsonify({
+            "success": False, 
+            "message": "Authentication failed", 
+            "error": str(e)
+        }), 500
 
 @auth_bp.route('/me', methods=['GET'])
 @token_required
