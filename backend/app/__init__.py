@@ -169,7 +169,7 @@ def create_app():
 
     # Register blueprints robustly
     blueprints = [
-        ('app.api.recommendations', 'recommendations_bp', '/api'),
+        ('app.api.recommendations', 'recommendations_bp', '/api/recommendations'),
         ('app.api.uploads', 'uploads_bp', '/api'),
         ('app.api.v1.routes.auth_routes', 'auth_bp', '/api/auth'),
         ('app.api.v1.routes.chat_routes', 'chat_bp', '/api/chat'),

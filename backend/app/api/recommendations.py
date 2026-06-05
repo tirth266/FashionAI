@@ -1,14 +1,23 @@
 from flask import Blueprint, request, jsonify
 from app.services.recommendation_service import RecommendationService
+from app.middleware.jwt_required import jwt_required
 import os
 import werkzeug
+import logging
+
+logger = logging.getLogger(__name__)
 
 recommendations_bp = Blueprint('recommendations', __name__)
 # Initialize service (this will load the model and index fashion items)
 recommender = RecommendationService()
 
-@recommendations_bp.route('/recommend', methods=['POST'])
+@recommendations_bp.route('/recommend', methods=['POST', 'OPTIONS'])
+@jwt_required
 def get_recommendations():
+    # Log for CORS debugging
+    logger.info(f"Recommendation Request - Method: {request.method}")
+    logger.info(f"Recommendation Request - Origin: {request.headers.get('Origin')}")
+
     if 'image' not in request.files:
         return jsonify({"success": False, "error": "No image uploaded"}), 400
     

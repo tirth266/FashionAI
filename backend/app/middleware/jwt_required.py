@@ -6,6 +6,9 @@ import os
 def jwt_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        if request.method == "OPTIONS":
+            return "", 200
+
         token = None
         if 'Authorization' in request.headers:
             auth_header = request.headers['Authorization']
@@ -18,7 +21,8 @@ def jwt_required(f):
             return jsonify({'message': 'Token is missing!'}), 401
 
         try:
-            data = jwt.decode(token, os.getenv("SECRET_KEY", "secret"), algorithms=["HS256"])
+            secret = current_app.config.get('SECRET_KEY') or os.getenv("SECRET_KEY", "secret")
+            data = jwt.decode(token, secret, algorithms=["HS256"])
             # You can attach user data to request if needed
             request.user = data
         except Exception as e:
