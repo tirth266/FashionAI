@@ -113,6 +113,15 @@ def create_app():
             "routes": routes
         }), 200
 
+    @app.route("/api/test-db")
+    def test_db():
+        from app.db.mongo import db
+        success, message = db.test_connection()
+        if success:
+            return jsonify({"status": "MongoDB Connected", "message": message}), 200
+        else:
+            return jsonify({"status": "MongoDB Connection Failed", "error": message}), 500
+
     # Register blueprints robustly
     blueprints = [
         ('app.api.recommendations', 'recommendations_bp', '/api'),

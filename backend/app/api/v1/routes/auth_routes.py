@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from datetime import datetime
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from app.models.user_model import User
@@ -107,12 +108,16 @@ def google_auth():
                 User.update_profile(user['_id'], {
                     "google_id": google_id,
                     "profile_picture": picture,
-                    "auth_provider": "google"
+                    "auth_provider": "google",
+                    "last_login": datetime.utcnow()
                 })
             else:
                 logger.info(f"Creating new user from Google: {email}")
-                User.create(email, google_id=google_id, name=name, profile_picture=picture, auth_provider="google")
+                User.create(email, google_id=google_id, name=name, profile_picture=picture, auth_provider="google", last_login=datetime.utcnow())
             user = User.find_by_email(email)
+        else:
+            # Update last login for existing Google user
+            User.update_profile(user['_id'], {"last_login": datetime.utcnow()})
 
         jwt_token = create_token({"user_id": str(user['_id']), "email": user['email']})
         logger.info(f"Authentication successful for {email}. JWT issued.")
