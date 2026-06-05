@@ -4,7 +4,10 @@ from bson import ObjectId
 import hashlib
 
 class User:
-    collection = db.get_collection("users")
+    @classmethod
+    def get_collection(cls):
+        """Lazy access to collection to avoid DB connection at import time."""
+        return db.get_collection("users")
 
     @classmethod
     def create(cls, email, password=None, **kwargs):
@@ -19,20 +22,20 @@ class User:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             user_data["password_hash"] = password_hash
             
-        result = cls.collection.insert_one(user_data)
+        result = cls.get_collection().insert_one(user_data)
         return result
 
     @classmethod
     def find_by_email(cls, email):
-        return cls.collection.find_one({"email": email})
+        return cls.get_collection().find_one({"email": email})
 
     @classmethod
     def find_by_google_id(cls, google_id):
-        return cls.collection.find_one({"google_id": google_id})
+        return cls.get_collection().find_one({"google_id": google_id})
 
     @classmethod
     def update_profile(cls, user_id, update_data):
-        return cls.collection.update_one(
+        return cls.get_collection().update_one(
             {"_id": ObjectId(user_id) if isinstance(user_id, str) else user_id},
             {"$set": update_data}
         )

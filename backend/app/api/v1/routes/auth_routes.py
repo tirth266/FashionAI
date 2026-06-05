@@ -5,7 +5,9 @@ from app.models.user_model import User
 from app.core.security import create_token
 from app.core.config import Config
 from app.middleware.auth_middleware import token_required
+import logging
 
+logger = logging.getLogger(__name__)
 auth_bp = Blueprint('auth_bp', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
@@ -44,11 +46,18 @@ def login():
         "token": token
     }), 200
 
-@auth_bp.route('/google', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/google', methods=['GET', 'POST', 'OPTIONS'])
 def google_auth():
     # 4. Explicitly support OPTIONS requests
     if request.method == "OPTIONS":
         return "", 200
+
+    if request.method == "GET":
+        return jsonify({
+            "message": "Google Auth Endpoint is ACTIVE",
+            "supported_methods": ["POST", "OPTIONS"],
+            "info": "Send a POST request with {'token': '...'} to authenticate."
+        }), 200
 
     # 8. Detailed Logging
     logger.info("Processing /api/auth/google POST request")

@@ -19,7 +19,7 @@ def token_required(f):
                 return jsonify({'message': 'Token is invalid!'}), 401
             
             user_id = payload.get("user_id")
-            user = User.collection.find_one({"_id": ObjectId(user_id)})
+            user = User.get_collection().find_one({"_id": ObjectId(user_id)})
             
             if not user:
                 return jsonify({'message': 'User not found!'}), 404

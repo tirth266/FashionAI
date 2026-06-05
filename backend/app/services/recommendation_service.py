@@ -27,7 +27,7 @@ class RecommendationService:
             return
         
         # Optimize memory by only fetching necessary fields and using a cursor
-        items_cursor = FashionItem.collection.find(
+        items_cursor = FashionItem.get_collection().find(
             {"embedding": {"$exists": True}}, 
             {"embedding": 1, "_id": 1}
         )

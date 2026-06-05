@@ -99,31 +99,52 @@ def create_app():
         logger.error(f"500 Internal Server Error: {e}", exc_info=True)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
-    # Register blueprints
-    try:
-        from app.api.recommendations import recommendations_bp
-        from app.api.uploads import uploads_bp
-        from app.api.v1.routes.auth_routes import auth_bp
-        from app.api.v1.routes.chat_routes import chat_bp
-        from app.api.v1.routes.outfit_routes import outfit_bp
-        from app.api.v1.routes.trend_routes import trend_bp
-        from app.api.v1.routes.user_routes import user_bp
+    @app.route("/api/debug/routes")
+    def list_routes():
+        routes = []
+        for rule in app.url_map.iter_rules():
+            routes.append({
+                "endpoint": rule.endpoint,
+                "methods": list(rule.methods),
+                "rule": rule.rule
+            })
+        return jsonify({
+            "total_routes": len(routes),
+            "routes": routes
+        }), 200
 
-        app.register_blueprint(recommendations_bp, url_prefix='/api')
-        app.register_blueprint(uploads_bp, url_prefix='/api')
-        app.register_blueprint(auth_bp, url_prefix='/api/auth')
-        app.register_blueprint(chat_bp, url_prefix='/api/chat')
-        app.register_blueprint(outfit_bp, url_prefix='/api/outfits')
-        app.register_blueprint(trend_bp, url_prefix='/api/trends')
-        app.register_blueprint(user_bp, url_prefix='/api/user')
-        logger.info("Blueprints registered successfully.")
-    except Exception as e:
-        logger.error(f"Blueprint Registration Failure: {e}", exc_info=True)
+    # Register blueprints robustly
+    blueprints = [
+        ('app.api.recommendations', 'recommendations_bp', '/api'),
+        ('app.api.uploads', 'uploads_bp', '/api'),
+        ('app.api.v1.routes.auth_routes', 'auth_bp', '/api/auth'),
+        ('app.api.v1.routes.chat_routes', 'chat_bp', '/api/chat'),
+        ('app.api.v1.routes.outfit_routes', 'outfit_bp', '/api/outfits'),
+        ('app.api.v1.routes.trend_routes', 'trend_bp', '/api/trends'),
+        ('app.api.v1.routes.user_routes', 'user_bp', '/api/user'),
+    ]
 
+    for module_path, bp_name, prefix in blueprints:
+        try:
+            module = __import__(module_path, fromlist=[bp_name])
+            bp = getattr(module, bp_name)
+            app.register_blueprint(bp, url_prefix=prefix)
+            logger.info(f"Successfully registered blueprint: {bp_name} at {prefix}")
+        except Exception as e:
+            logger.error(f"CRITICAL: Failed to register blueprint {bp_name} from {module_path}: {e}")
+            # We continue to register other blueprints even if one fails
+    
     @app.after_request
     def add_security_headers(response):
-        # 9. Ensure CORS headers are returned even when exceptions occur
-        # Flask-CORS handles most of this, but we add COOP for Google OAuth specifically
+        # Ensure CORS headers are present even for error responses
+        if 'Access-Control-Allow-Origin' not in response.headers:
+            origin = request.headers.get('Origin')
+            if origin in ["https://fashion-ai-sand.vercel.app", "http://localhost:5173"]:
+                response.headers['Access-Control-Allow-Origin'] = origin
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+                response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
         return response
 

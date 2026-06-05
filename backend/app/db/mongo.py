@@ -1,7 +1,9 @@
 import os
+import logging
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
+logger = logging.getLogger(__name__)
 load_dotenv()
 
 class MongoDB:
@@ -14,28 +16,36 @@ class MongoDB:
     def client(self):
         if self._client is None:
             if not self.uri:
-                # Log but don't crash the whole app at import time
-                print("CRITICAL: MONGO_URI is not set in environment variables.")
-                # We return a dummy client or wait? 
-                # Better to raise a more descriptive error when actually accessed
+                logger.error("CRITICAL: MONGO_URI is not set in environment variables.")
                 raise ValueError("MONGO_URI environment variable is missing. Check Render Dashboard.")
-            self._client = MongoClient(self.uri, serverSelectionTimeoutMS=5000)
+            try:
+                self._client = MongoClient(self.uri, serverSelectionTimeoutMS=5000)
+                # Quick connectivity check
+                self._client.admin.command('ping')
+                logger.info("Successfully connected to MongoDB")
+            except Exception as e:
+                logger.error(f"CRITICAL: Failed to connect to MongoDB: {e}")
+                raise
         return self._client
 
     @property
     def db(self):
         if self._db is None:
-            # This will trigger client property and connection check
             try:
-                self._db = self.client.get_database()
-                # Check connection
-                self._client.server_info() 
+                # Trigger client connection
+                client = self.client
+                self._db = client.get_database()
+                logger.info(f"Database initialized: {self._db.name}")
             except Exception as e:
-                print(f"CRITICAL: Failed to connect to MongoDB: {e}")
+                logger.error(f"CRITICAL: Database initialization failure: {e}")
                 raise
         return self._db
 
     def get_collection(self, name):
-        return self.db[name]
+        try:
+            return self.db[name]
+        except Exception as e:
+            logger.error(f"Failed to get collection {name}: {e}")
+            raise
 
 db = MongoDB()
