@@ -113,14 +113,39 @@ def create_app():
             "routes": routes
         }), 200
 
+    @app.route("/api/debug/gemini")
+    def test_gemini():
+        try:
+            from app.agents.fashion_chat_agent import FashionChatAgent
+            agent = FashionChatAgent()
+            result = agent.process("Hello, are you working?")
+            return jsonify({
+                "status": "connected",
+                "response": result
+            }), 200
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "details": str(e)
+            }), 500
+
     @app.route("/api/test-db")
     def test_db():
         from app.db.mongo import db
         success, message = db.test_connection()
         if success:
-            return jsonify({"status": "MongoDB Connected", "message": message}), 200
+            return jsonify({
+                "success": True,
+                "database": "fashionai",
+                "status": "connected",
+                "details": message
+            }), 200
         else:
-            return jsonify({"status": "MongoDB Connection Failed", "error": message}), 500
+            return jsonify({
+                "success": False,
+                "status": "failed",
+                "error": message
+            }), 500
 
     # Register blueprints robustly
     blueprints = [

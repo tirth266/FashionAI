@@ -60,8 +60,7 @@ def google_auth():
             "info": "Send a POST request with {'token': '...'} to authenticate."
         }), 200
 
-    # 8. Detailed Logging
-    logger.info("Processing /api/auth/google POST request")
+    logger.info("Google credential received - Processing /api/auth/google POST request")
     
     try:
         data = request.get_json()
@@ -86,7 +85,7 @@ def google_auth():
                 requests.Request(), 
                 Config.GOOGLE_CLIENT_ID
             )
-            logger.info("Google Token verified successfully")
+            logger.info("Google token verified successfully")
         except ValueError as ve:
             logger.error(f"Google Token Validation Error: {str(ve)}")
             return jsonify({"success": False, "message": "Invalid Google token", "error": str(ve)}), 400
@@ -98,26 +97,36 @@ def google_auth():
 
         logger.info(f"Authenticating user: {email}")
 
-        user = User.find_by_google_id(google_id)
+        # MongoDB Operations with explicit naming and robust handling
+        try:
+            user = User.find_by_google_id(google_id)
 
-        if not user:
-            logger.info(f"User {email} not found by Google ID, checking email...")
-            user = User.find_by_email(email)
-            if user:
-                logger.info(f"Linking Google ID to existing user: {email}")
-                User.update_profile(user['_id'], {
-                    "google_id": google_id,
-                    "profile_picture": picture,
-                    "auth_provider": "google",
-                    "last_login": datetime.utcnow()
-                })
+            if not user:
+                logger.info(f"User {email} not found by Google ID, checking email...")
+                user = User.find_by_email(email)
+                if user:
+                    logger.info(f"Linking Google ID to existing user: {email}")
+                    User.update_profile(user['_id'], {
+                        "google_id": google_id,
+                        "profile_picture": picture,
+                        "auth_provider": "google",
+                        "last_login": datetime.utcnow()
+                    })
+                else:
+                    logger.info(f"Creating new user from Google: {email}")
+                    User.create(email, google_id=google_id, name=name, profile_picture=picture, auth_provider="google", last_login=datetime.utcnow())
+                    logger.info(f"User created: {email}")
+                
+                user = User.find_by_email(email)
             else:
-                logger.info(f"Creating new user from Google: {email}")
-                User.create(email, google_id=google_id, name=name, profile_picture=picture, auth_provider="google", last_login=datetime.utcnow())
-            user = User.find_by_email(email)
-        else:
-            # Update last login for existing Google user
-            User.update_profile(user['_id'], {"last_login": datetime.utcnow()})
+                logger.info(f"User found: {email}")
+                # Update last login for existing Google user
+                User.update_profile(user['_id'], {"last_login": datetime.utcnow()})
+
+            logger.info("MongoDB operations successful")
+        except Exception as db_e:
+            logger.error(f"MongoDB connection/operation failed during Google Auth: {db_e}")
+            return jsonify({"success": False, "message": "Database operation failed", "error": str(db_e)}), 500
 
         jwt_token = create_token({"user_id": str(user['_id']), "email": user['email']})
         logger.info(f"Authentication successful for {email}. JWT issued.")
@@ -133,7 +142,7 @@ def google_auth():
         }), 200
 
     except Exception as e:
-        logger.error(f"Google Auth Global Exception: {str(e)}", exc_info=True)
+        logger.error(f"Authentication failed - Google Auth Global Exception: {str(e)}", exc_info=True)
         return jsonify({
             "success": False, 
             "message": "Authentication failed", 
