@@ -14,23 +14,43 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 def validate_env_vars():
-    """5. Validate Environment Variables: Log missing variables without crashing."""
-    required_vars = [
+    """5. Validate Environment Variables: Log missing variables and fail fast on critical ones."""
+    critical_vars = [
         "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET",
-        "SECRET_KEY",
-        "MONGO_URI"
+        "SECRET_KEY"
     ]
-    missing = [var for var in required_vars if not os.getenv(var)]
-    if missing:
-        logger.warning(f"CRITICAL: MISSING ENV VARS: {', '.join(missing)}")
-    else:
-        logger.info("All required environment variables are verified.")
+    missing_critical = [var for var in critical_vars if not os.getenv(var)]
+    
+    # Special handling for MongoDB URI (supports fallback)
+    mongo_uri = os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")
+    
+    if missing_critical:
+        logger.error(f"FATAL: MISSING CRITICAL ENV VARS: {', '.join(missing_critical)}")
+        raise RuntimeError(f"Missing critical environment variables: {', '.join(missing_critical)}")
+    
+    if not mongo_uri:
+        logger.error("FATAL: MongoDB URI not found. Set MONGO_URI or MONGODB_URI.")
+        raise RuntimeError("MongoDB URI not found. Set MONGO_URI or MONGODB_URI.")
+    
+    # Basic URI scheme validation
+    if not (mongo_uri.startswith("mongodb://") or mongo_uri.startswith("mongodb+srv://")):
+        prefix = mongo_uri.split("://")[0] if "://" in mongo_uri else "NO_SCHEME"
+        logger.error(f"FATAL: Invalid MongoDB URI scheme: '{prefix}'")
+        raise RuntimeError(f"Invalid MongoDB URI scheme: '{prefix}'. Must start with 'mongodb://' or 'mongodb+srv://'.")
+
+    logger.info("All required environment variables are verified (with Fallback support).")
 
 def create_app():
     app = Flask(__name__)
     
     validate_env_vars()
+
+    # Log registered routes at startup for debugging
+    with app.app_context():
+        logger.info("\n=== REGISTERED ROUTES ===")
+        for rule in app.url_map.iter_rules():
+            logger.info(f"{rule.endpoint:40s} {','.join(rule.methods):20s} {rule.rule}")
+        logger.info("=========================\n")
 
     # 2 & 3. Fix CORS: Production-ready configuration with explicit resource mapping
     CORS(

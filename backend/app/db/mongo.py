@@ -8,19 +8,40 @@ load_dotenv()
 
 class MongoDB:
     def __init__(self):
-        self.uri = os.getenv("MONGO_URI")
+        # Support both MONGO_URI and MONGODB_URI
+        raw_uri = os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")
+        self.uri = raw_uri.strip().strip("'").strip('"') if raw_uri else None
         self.db_name = "fashionai"
         self._client = None
         self._db = None
+        
+        # Immediate validation on startup
+        if not self.uri:
+            logger.error("CRITICAL: MongoDB URI not found. Set MONGO_URI or MONGODB_URI.")
+        else:
+            # Secure debug logging
+            prefix = self.uri.split("://")[0] if "://" in self.uri else "NO_SCHEME"
+            # Log URI existence and scheme without secrets
+            logger.info(f"MongoDB URI found. Scheme: {prefix} (length: {len(self.uri)})")
+            
+            if not (self.uri.startswith("mongodb://") or self.uri.startswith("mongodb+srv://")):
+                logger.error(f"CRITICAL: Invalid MongoDB URI scheme. Must start with 'mongodb://' or 'mongodb+srv://'. Found: '{prefix}'")
+                # We don't raise here yet to allow the app to potentially report the error via health checks
+                # but we will fail fast in the client property.
 
     @property
     def client(self):
         if self._client is None:
             if not self.uri:
-                logger.error("CRITICAL: MONGO_URI is not set in environment variables.")
-                return None # Return None to allow health checks to report status
+                raise RuntimeError("MongoDB URI not found. Set MONGO_URI or MONGODB_URI environment variable.")
+            
+            if not (self.uri.startswith("mongodb://") or self.uri.startswith("mongodb+srv://")):
+                prefix = self.uri.split("://")[0] if "://" in self.uri else "NO_SCHEME"
+                raise RuntimeError(f"Invalid MongoDB URI scheme: '{prefix}'. Must start with 'mongodb://' or 'mongodb+srv://'.")
+
             try:
                 # Use a reasonable timeout for server selection
+                logger.info("Initializing MongoClient with verified URI scheme...")
                 self._client = MongoClient(self.uri, serverSelectionTimeoutMS=5000)
                 # Verify connection
                 self._client.admin.command('ping')
