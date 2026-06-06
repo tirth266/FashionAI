@@ -21,24 +21,16 @@
 
   /* Smooth transitions for common elements */
   * {
-    @apply transition-all duration-200 ease-in-out;
+    @apply transition-all duration-300 ease-in-out;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white dark:bg-card-dark rounded-xl shadow-soft dark:shadow-none dark:border dark:border-gray-800 p-6;
+    @apply bg-white dark:bg-card-dark rounded-2xl shadow-soft dark:shadow-none border border-card-light dark:border-card-dark p-6;
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-brand to-purple-500 text-white font-medium px-6 py-2.5 rounded-full hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .sidebar-item {
-    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors;
-  }
-
-  .sidebar-item.active {
-    @apply bg-brand-light dark:bg-gray-800 text-brand dark:text-brand-light font-semibold;
+    @apply bg-brand text-white font-bold px-6 py-2.5 rounded-full hover:bg-brand-dark transition-all shadow-md active:scale-95 disabled:opacity-50;
   }
 }
