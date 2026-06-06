@@ -39,12 +39,12 @@ const ThemeToggle = () => {
       {/* Icons/Labels */}
       <div className="flex w-full justify-between items-center z-10 px-0.5">
         <div className="flex-1 flex items-center justify-center space-x-0.5">
-          <Sun size={12} className={!isDark ? 'text-brand' : 'text-gray-400'} />
-          {!isDark && <span className="text-[9px] font-bold uppercase text-navy">Light</span>}
+          <Sun size={12} className={!isDark ? 'text-brand' : 'text-gray-400 dark:text-gray-600'} />
+          {!isDark && <span className="text-[9px] font-bold uppercase text-gray-900">Light</span>}
         </div>
         <div className="flex-1 flex items-center justify-center space-x-0.5">
           {isDark && <span className="text-[9px] font-bold uppercase text-white">Dark</span>}
-          <Moon size={12} className={isDark ? 'text-white' : 'text-gray-400'} />
+          <Moon size={12} className={isDark ? 'text-white' : 'text-gray-400 dark:text-gray-600'} />
         </div>
       </div>
     </button>

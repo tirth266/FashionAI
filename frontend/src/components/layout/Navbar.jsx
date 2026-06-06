@@ -6,11 +6,11 @@ export const Navbar = () => {
   return (
     <header className="h-16 bg-white dark:bg-header-dark border-b border-header-light dark:border-header-dark flex items-center justify-between px-6 sticky top-0 z-10 transition-colors duration-300">
       <div className="flex items-center bg-search-light dark:bg-search-dark rounded-xl px-4 py-2 border border-search-light dark:border-search-dark w-80 focus-within:ring-2 focus-within:ring-brand/10 transition-all">
-        <Search size={18} className="text-gray-400 mr-2" />
+        <Search size={18} className="text-gray-400 dark:text-gray-600 mr-2" />
         <input 
           type="text" 
           placeholder="Search fashion..." 
-          className="bg-transparent border-none outline-none text-sm w-full text-navy dark:text-white placeholder-gray-400"
+          className="bg-transparent border-none outline-none text-sm w-full text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600"
         />
       </div>
       <div className="flex items-center space-x-6">
@@ -23,7 +23,7 @@ export const Navbar = () => {
         
         <div className="flex items-center space-x-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-navy dark:text-white leading-none">John Doe</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-none">John Doe</p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Premium Member</p>
           </div>
           <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center text-white font-bold shadow-sm">

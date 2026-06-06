@@ -67,7 +67,7 @@ export const StylistChat = () => {
           <MessageSquare size={28} className="text-brand" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-navy dark:text-white tracking-tight">AI Fashion Stylist</h1>
+          <h1 className="text-2xl font-bold text-gray-950 dark:text-white tracking-tight">AI Fashion Stylist</h1>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-medium italic">Expert style advice, powered by StylePulse AI</p>
         </div>
       </div>
@@ -81,18 +81,18 @@ export const StylistChat = () => {
               className={`flex items-start space-x-4 ${msg.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}
             >
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm ${
-                msg.sender === 'ai' ? 'bg-brand' : 'bg-navy dark:bg-gray-700'
+                msg.sender === 'ai' ? 'bg-brand' : 'bg-gray-900 dark:bg-gray-700'
               }`}>
                 {msg.sender === 'ai' ? <Sparkles size={20} className="text-white" /> : <User size={20} className="text-gray-100" />}
               </div>
               <div className={`rounded-2xl p-4 max-w-[80%] shadow-sm ${
                 msg.sender === 'ai' 
-                  ? 'bg-gray-50 dark:bg-gray-800 text-navy dark:text-gray-200 rounded-tl-none border border-gray-100 dark:border-gray-700' 
+                  ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-none border border-gray-100 dark:border-gray-700' 
                   : 'bg-brand text-white rounded-tr-none'
-              } ${msg.isError ? 'border-alert bg-rose-50 dark:bg-rose-900/10' : ''}`}>
+              } ${msg.isError ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/10' : ''}`}>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
                 <span className={`text-[10px] mt-3 block font-bold uppercase tracking-widest opacity-60 ${
-                  msg.sender === 'ai' ? 'text-gray-500' : 'text-brand-light'
+                  msg.sender === 'ai' ? 'text-gray-500' : 'text-violet-200'
                 }`}>
                   {msg.timestamp}
                 </span>
@@ -128,7 +128,7 @@ export const StylistChat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask for outfit ideas, trends, or style tips..." 
-                  className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-5 pr-12 text-navy dark:text-white outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm"
+                  className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-5 pr-12 text-gray-900 dark:text-white outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm"
                   disabled={isLoading}
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">

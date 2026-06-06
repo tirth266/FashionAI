@@ -5,23 +5,40 @@
 @layer base {
   :root {
     color-scheme: light;
+    --text-primary:   #111827;
+    --text-secondary: #6B7280;
+    --text-muted:     #9CA3AF;
+    --text-accent:    #7C3AED;
+    --text-success:   #10B981;
+    --text-alert:     #F43F5E;
   }
   
   .dark {
     color-scheme: dark;
+    --text-primary:   #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-muted:     #9CA3AF;
+    --text-accent:    #A78BFA;
+    --text-success:   #34D399;
+    --text-alert:     #FB7185;
   }
 
   body {
-    @apply bg-page-light text-navy transition-colors duration-300 ease-in-out m-0 p-0 font-sans;
+    @apply bg-page-light transition-colors duration-300 ease-in-out m-0 p-0 font-sans;
+    color: var(--text-primary);
   }
 
   .dark body {
-    @apply bg-page-dark text-gray-100;
+    @apply bg-page-dark;
   }
 
   /* Smooth transitions for common elements */
   * {
     @apply transition-all duration-300 ease-in-out;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-gray-950 dark:text-white font-bold;
   }
 }
 
