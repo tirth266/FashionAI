@@ -5,27 +5,33 @@
 @layer base {
   :root {
     color-scheme: light;
-    --text-primary:   #111827;
-    --text-secondary: #6B7280;
-    --text-muted:     #9CA3AF;
-    --text-accent:    #7C3AED;
-    --text-success:   #10B981;
-    --text-alert:     #F43F5E;
+    --color-text-primary:    #111827;
+    --color-text-secondary:  #6B7280;
+    --color-text-muted:      #9CA3AF;
+    --color-text-heading:    #0A0A0A;
+    --color-text-accent:     #7C3AED;
+    --color-text-success:    #10B981;
+    --color-text-danger:     #F43F5E;
+    --color-text-info:       #7C3AED;
+    --color-text-white:      #FFFFFF;
   }
   
   .dark {
     color-scheme: dark;
-    --text-primary:   #F9FAFB;
-    --text-secondary: #D1D5DB;
-    --text-muted:     #9CA3AF;
-    --text-accent:    #A78BFA;
-    --text-success:   #34D399;
-    --text-alert:     #FB7185;
+    --color-text-primary:    #F9FAFB;
+    --color-text-secondary:  #9CA3AF;
+    --color-text-muted:      #4B5563;
+    --color-text-heading:    #FFFFFF;
+    --color-text-accent:     #A78BFA;
+    --color-text-success:    #34D399;
+    --color-text-danger:     #FB7185;
+    --color-text-info:       #A78BFA;
+    --color-text-white:      #FFFFFF;
   }
 
   body {
     @apply bg-page-light transition-colors duration-300 ease-in-out m-0 p-0 font-sans;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
   }
 
   .dark body {
@@ -43,6 +49,13 @@
 }
 
 @layer components {
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+  }
+
   .card {
     @apply bg-white dark:bg-card-dark rounded-2xl shadow-soft dark:shadow-none border border-card-light dark:border-card-dark p-6;
   }

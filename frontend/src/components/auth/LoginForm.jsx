@@ -41,7 +41,7 @@ export const LoginForm = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 flex items-center gap-2 text-red-500 text-sm"
+              className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 flex items-center gap-2 text-rose-500 dark:text-rose-400 text-sm"
             >
               <AlertCircle size={16} />
               {error}
@@ -50,9 +50,9 @@ export const LoginForm = () => {
         </AnimatePresence>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300 ml-1">Email Address</label>
+          <label className="text-sm font-medium text-gray-600 dark:text-gray-300 ml-1">Email Address</label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 dark:text-gray-400">
               <Mail size={18} />
             </div>
             <input
@@ -60,7 +60,7 @@ export const LoginForm = () => {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2.5 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-gray-500"
+              className="block w-full pl-10 pr-3 py-2.5 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
               placeholder="name@example.com"
             />
           </div>
@@ -68,13 +68,13 @@ export const LoginForm = () => {
 
         <div className="space-y-2">
           <div className="flex justify-between items-center ml-1">
-            <label className="text-sm font-medium text-gray-300">Password</label>
-            <Link to={ROUTES.FORGOT_PASSWORD} className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+            <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Password</label>
+            <Link to={ROUTES.FORGOT_PASSWORD} className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-500 dark:hover:text-violet-300 transition-colors">
               Forgot password?
             </Link>
           </div>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 dark:text-gray-400">
               <Lock size={18} />
             </div>
             <input
@@ -82,13 +82,13 @@ export const LoginForm = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2.5 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-gray-500"
+              className="block w-full pl-10 pr-10 py-2.5 bg-black/20 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -104,7 +104,7 @@ export const LoginForm = () => {
             onChange={(e) => setRememberMe(e.target.checked)}
             className="h-4 w-4 rounded border-white/10 bg-black/20 text-purple-600 focus:ring-purple-500 focus:ring-offset-black"
           />
-          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400 cursor-pointer">
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-500 dark:text-gray-400 cursor-pointer">
             Remember me
           </label>
         </div>
@@ -122,9 +122,9 @@ export const LoginForm = () => {
 
       <SocialLogin />
 
-      <p className="text-center text-sm text-gray-400">
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
         Don't have an account?{' '}
-        <Link to={ROUTES.REGISTER} className="font-medium text-purple-400 hover:text-purple-300 transition-colors">
+        <Link to={ROUTES.REGISTER} className="font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500 dark:hover:text-violet-300 transition-colors">
           Create an account
         </Link>
       </p>

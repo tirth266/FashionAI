@@ -19,7 +19,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-wider mb-6"
+            className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-wider mb-6"
           >
             <Sparkles size={14} />
             <span>AI-Powered Fashion Intelligence</span>
@@ -29,16 +29,16 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-extrabold text-white leading-[1.1] mb-8"
+            className="text-5xl md:text-7xl font-extrabold text-gray-950 dark:text-white leading-[1.1] mb-8"
           >
-            Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Style with AI</span>
+            Find Your Perfect <span className="hero-gradient-text">Style with AI</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-400 leading-relaxed mb-10 px-4"
+            className="text-lg md:text-xl text-[#64748B] dark:text-gray-400 leading-relaxed mb-10 px-4 font-medium"
           >
             Discover personalized fashion recommendations, build stunning outfits, and stay ahead of trends with our advanced AI stylist.
           </motion.p>
@@ -49,11 +49,11 @@ export const Hero = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6"
           >
-            <Link to={ROUTES.DASHBOARD} className="w-full sm:w-auto px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all transform hover:scale-105 flex items-center justify-center space-x-2">
+            <Link to={ROUTES.DASHBOARD} className="w-full sm:w-auto px-8 py-4 bg-brand hover:bg-brand-dark text-white font-bold rounded-full transition-all transform hover:scale-105 flex items-center justify-center space-x-2 shadow-lg shadow-brand/20">
               <span>Get Styled Now</span>
               <ArrowRight size={20} />
             </Link>
-            <button className="w-full sm:w-auto px-8 py-4 bg-gray-800/50 hover:bg-gray-800 text-white font-bold rounded-full border border-gray-700 transition-all flex items-center justify-center space-x-2">
+            <button className="w-full sm:w-auto px-8 py-4 bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-900 dark:text-white font-bold rounded-full border border-light dark:border-dark transition-all flex items-center justify-center space-x-2">
               <Play size={18} fill="currentColor" />
               <span>Explore Trends</span>
             </button>
@@ -67,18 +67,18 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mt-20 relative"
         >
-          <div className="relative mx-auto max-w-5xl rounded-2xl border border-gray-800 bg-dark/50 backdrop-blur-sm p-4 shadow-2xl overflow-hidden">
-            <div className="flex items-center space-x-2 mb-4 border-b border-gray-800 pb-4 px-2">
+          <div className="relative mx-auto max-w-5xl rounded-2xl border border-light dark:border-dark bg-white/50 dark:bg-card-dark/50 backdrop-blur-sm p-4 shadow-2xl overflow-hidden transition-colors duration-300">
+            <div className="flex items-center space-x-2 mb-4 border-b border-light dark:border-dark pb-4 px-2">
                 <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
                 <div className="flex-1"></div>
-                <div className="w-32 h-2 bg-gray-800 rounded-full"></div>
+                <div className="w-32 h-2 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
             </div>
             <div className="grid grid-cols-12 gap-4 h-64 md:h-96">
                 <div className="col-span-3 space-y-3">
-                    <div className="h-full bg-gray-800/30 rounded-lg p-3 space-y-4">
-                        {[1, 2, 3, 4].map(i => <div key={i} className="h-2 w-full bg-gray-700/50 rounded-full"></div>)}
+                    <div className="h-full bg-gray-100 dark:bg-gray-800/30 rounded-lg p-3 space-y-4">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-2 w-full bg-gray-200 dark:bg-gray-700/50 rounded-full"></div>)}
                     </div>
                 </div>
                 <div className="col-span-9 space-y-4">
@@ -86,7 +86,7 @@ export const Hero = () => {
                         <Shirt className="text-purple-500/20" size={120} />
                     </div>
                     <div className="h-1/3 grid grid-cols-3 gap-4">
-                        {[1, 2, 3].map(i => <div key={i} className="bg-gray-800/30 rounded-lg"></div>)}
+                        {[1, 2, 3].map(i => <div key={i} className="bg-gray-100 dark:bg-gray-800/30 rounded-lg"></div>)}
                     </div>
                 </div>
             </div>
@@ -96,16 +96,16 @@ export const Hero = () => {
             <motion.div 
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="bg-dark border border-purple-500/30 p-4 rounded-xl shadow-xl"
+                className="bg-white dark:bg-card-dark border border-purple-500/30 p-4 rounded-xl shadow-xl transition-colors duration-300"
             >
-                <p className="text-xs text-gray-400">Style Match</p>
-                <p className="text-lg font-bold text-purple-500">98% Match</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Style Match</p>
+                <p className="text-lg font-bold text-violet-600 dark:text-violet-400">98% Match</p>
             </motion.div>
           </div>
         </motion.div>
 
         {/* Stats */}
-        <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-gray-800 pt-12">
+        <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-light dark:border-dark pt-12">
             {[
                 { label: 'Outfits Generated', value: '1.2M+' },
                 { label: 'Styles Analyzed', value: '500k+' },
@@ -113,8 +113,8 @@ export const Hero = () => {
                 { label: 'Trend Accuracy', value: '95%' }
             ].map((stat, i) => (
                 <div key={i} className="text-center">
-                    <p className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</p>
-                    <p className="text-sm text-gray-500">{stat.label}</p>
+                    <p className="text-2xl md:text-3xl font-bold text-gray-950 dark:text-white mb-1">{stat.value}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{stat.label}</p>
                 </div>
             ))}
         </div>

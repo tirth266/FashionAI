@@ -92,7 +92,7 @@ export const StylistChat = () => {
               } ${msg.isError ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/10' : ''}`}>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
                 <span className={`text-[10px] mt-3 block font-bold uppercase tracking-widest opacity-60 ${
-                  msg.sender === 'ai' ? 'text-gray-500' : 'text-violet-200'
+                  msg.sender === 'ai' ? 'text-gray-500' : 'text-gray-300'
                 }`}>
                   {msg.timestamp}
                 </span>
@@ -104,7 +104,7 @@ export const StylistChat = () => {
               <div className="w-10 h-10 bg-brand rounded-2xl flex items-center justify-center flex-shrink-0">
                 <Sparkles size={20} className="text-white" />
               </div>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl rounded-tl-none p-4 text-gray-400 flex items-center space-x-2 border border-gray-100 dark:border-gray-700">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl rounded-tl-none p-4 text-gray-400 dark:text-gray-600 flex items-center space-x-2 border border-gray-100 dark:border-gray-700">
                 <Loader2 size={16} className="animate-spin" />
                 <span className="text-xs font-bold uppercase tracking-widest">Stylist is thinking...</span>
               </div>
@@ -128,7 +128,7 @@ export const StylistChat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask for outfit ideas, trends, or style tips..." 
-                  className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-5 pr-12 text-gray-900 dark:text-white outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm"
+                  className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl py-4 px-5 pr-12 text-gray-900 dark:text-white outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm placeholder-gray-400 dark:placeholder-gray-600"
                   disabled={isLoading}
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -146,7 +146,7 @@ export const StylistChat = () => {
            <div className="flex justify-center items-center space-x-4 mt-4">
               <p className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Powered by StylePulse AI</p>
               <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-              <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Gemini 1.5 Pro</p>
+              <p className="text-[10px] text-violet-600 dark:text-violet-400 uppercase tracking-widest font-bold">Gemini 1.5 Pro</p>
            </div>
         </div>
       </div>

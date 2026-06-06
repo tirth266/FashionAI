@@ -18,12 +18,14 @@ const NavItem = ({ to, icon: Icon, label }) => {
       className={({ isActive }) =>
         `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
           isActive 
-            ? 'bg-brand-light dark:bg-brand/10 text-violet-600 dark:text-violet-400 font-semibold' 
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-violet-600 dark:hover:text-violet-400 font-medium'
+            ? 'bg-brand-light dark:bg-brand/10 text-violet-600 dark:text-violet-400 font-bold' 
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-violet-600 dark:hover:text-violet-400 font-medium'
         }`
       }
     >
-      <Icon size={20} className="flex-shrink-0" />
+      <Icon size={20} className={({ isActive }) => 
+        `flex-shrink-0 transition-colors ${isActive ? 'text-violet-600 dark:text-violet-400' : 'text-gray-500 dark:text-gray-400'}`
+      } />
       <span>{label}</span>
     </NavLink>
   );

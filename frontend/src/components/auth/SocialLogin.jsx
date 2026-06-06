@@ -30,7 +30,7 @@ export const SocialLogin = () => {
           <div className="w-full border-t border-white/10"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-transparent text-gray-500">Or continue with</span>
+          <span className="px-2 bg-transparent text-gray-500 dark:text-gray-400">Or continue with</span>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export const SocialLogin = () => {
               console.error('Google Sign-In Error: Popup closed or failed to initialize.');
             }}
             useOneTap={false} // Avoid duplicate triggers from One Tap
-            theme="filled_black"
+            theme={document.documentElement.classList.contains('dark') ? 'filled_black' : 'outline'}
             shape="pill"
             text="signin_with"
             width="320" // Numeric width instead of 100%

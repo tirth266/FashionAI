@@ -36,49 +36,49 @@ const plans = [
 
 export const Pricing = () => {
   return (
-    <section id="pricing" className="py-24">
+    <section id="pricing" className="py-24 bg-white dark:bg-page-dark transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-gray-400">Choose the plan that fits your style goals. No hidden fees, cancel anytime.</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-950 dark:text-white mb-4">Simple, Transparent Pricing</h2>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Choose the plan that fits your style goals. No hidden fees, cancel anytime.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((p, i) => (
             <div 
               key={i} 
-              className={`relative bg-dark p-8 rounded-3xl border ${p.popular ? 'border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.15)]' : 'border-gray-800'} flex flex-col`}
+              className={`relative bg-white dark:bg-card-dark p-8 rounded-3xl border transition-all duration-300 ${p.popular ? 'border-brand shadow-xl scale-105 z-10' : 'border-light dark:border-dark shadow-soft'} flex flex-col`}
             >
               {p.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest py-1 px-4 rounded-full">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand text-white text-[10px] font-bold uppercase tracking-widest py-1 px-4 rounded-full shadow-lg">
                   Most Popular
                 </div>
               )}
-              <h3 className="text-xl font-bold text-white mb-2">{p.name}</h3>
+              <h3 className="text-xl font-bold text-gray-950 dark:text-white mb-2">{p.name}</h3>
               <div className="flex items-baseline space-x-1 mb-4">
-                <span className="text-4xl font-bold text-white">{p.price}</span>
-                <span className="text-gray-500">/month</span>
+                <span className="text-4xl font-bold text-gray-950 dark:text-white">{p.price}</span>
+                <span className="text-gray-500 dark:text-gray-400">/month</span>
               </div>
-              <p className="text-sm text-gray-400 mb-8">{p.desc}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-8 font-medium">{p.desc}</p>
               
               <div className="space-y-4 mb-10 flex-1">
                 {p.features.map((f, j) => (
                   <div key={j} className="flex items-center space-x-3">
-                    <Check size={18} className="text-purple-500" />
-                    <span className="text-sm text-gray-300">{f}</span>
+                    <Check size={18} className="text-emerald-500" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{f}</span>
                   </div>
                 ))}
                 {p.not.map((f, j) => (
                   <div key={j} className="flex items-center space-x-3 opacity-40">
-                    <X size={18} className="text-gray-500" />
-                    <span className="text-sm text-gray-500 line-through">{f}</span>
+                    <X size={18} className="text-gray-400 dark:text-gray-600" />
+                    <span className="text-sm text-gray-500 dark:text-gray-600 line-through">{f}</span>
                   </div>
                 ))}
               </div>
 
               <Link 
                 to={ROUTES.DASHBOARD} 
-                className={`w-full py-4 text-center rounded-xl font-bold transition-all ${p.popular ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}
+                className={`w-full py-4 text-center rounded-xl font-bold transition-all duration-300 shadow-md ${p.popular ? 'bg-brand hover:bg-brand-dark text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
               >
                 {p.cta}
               </Link>

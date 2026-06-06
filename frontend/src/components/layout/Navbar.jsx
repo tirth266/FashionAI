@@ -23,8 +23,8 @@ export const Navbar = () => {
         
         <div className="flex items-center space-x-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-none">John Doe</p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Premium Member</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-none">John Doe</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 font-medium">Premium Member</p>
           </div>
           <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center text-white font-bold shadow-sm">
             JD
