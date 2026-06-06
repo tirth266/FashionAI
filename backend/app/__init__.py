@@ -17,28 +17,54 @@ def validate_env_vars():
     """5. Validate Environment Variables: Log missing variables and fail fast on critical ones."""
     critical_vars = [
         "GOOGLE_CLIENT_ID",
-        "SECRET_KEY"
+        "SECRET_KEY",
+        "MONGO_URI"
     ]
-    missing_critical = [var for var in critical_vars if not os.getenv(var)]
+    optional_vars = [
+        "GEMINI_API_KEY",
+        "UPLOAD_FOLDER"
+    ]
     
-    # Special handling for MongoDB URI (supports fallback)
-    mongo_uri = os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")
+    logger.info("=== Environment Variable Audit ===")
     
+    # Check Critical Variables
+    missing_critical = []
+    for var in critical_vars:
+        value = os.getenv(var)
+        if value:
+            logger.info(f"[CONF] {var:20}: PRESENT")
+        else:
+            # Special check for MONGO_URI/MONGODB_URI fallback
+            if var == "MONGO_URI":
+                fallback = os.getenv("MONGODB_URI")
+                if fallback:
+                    logger.info(f"[CONF] {var:20}: PRESENT (via MONGODB_URI fallback)")
+                    continue
+            
+            logger.error(f"[CONF] {var:20}: MISSING")
+            missing_critical.append(var)
+
+    # Check Optional Variables
+    for var in optional_vars:
+        value = os.getenv(var)
+        if value:
+            logger.info(f"[CONF] {var:20}: PRESENT")
+        else:
+            logger.warning(f"[CONF] {var:20}: MISSING (Optional)")
+
     if missing_critical:
         logger.error(f"FATAL: MISSING CRITICAL ENV VARS: {', '.join(missing_critical)}")
         raise RuntimeError(f"Missing critical environment variables: {', '.join(missing_critical)}")
     
-    if not mongo_uri:
-        logger.error("FATAL: MongoDB URI not found. Set MONGO_URI or MONGODB_URI.")
-        raise RuntimeError("MongoDB URI not found. Set MONGO_URI or MONGODB_URI.")
-    
-    # Basic URI scheme validation
-    if not (mongo_uri.startswith("mongodb://") or mongo_uri.startswith("mongodb+srv://")):
+    # Basic URI scheme validation for MongoDB
+    mongo_uri = os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")
+    if mongo_uri and not (mongo_uri.startswith("mongodb://") or mongo_uri.startswith("mongodb+srv://")):
         prefix = mongo_uri.split("://")[0] if "://" in mongo_uri else "NO_SCHEME"
         logger.error(f"FATAL: Invalid MongoDB URI scheme: '{prefix}'")
         raise RuntimeError(f"Invalid MongoDB URI scheme: '{prefix}'. Must start with 'mongodb://' or 'mongodb+srv://'.")
 
-    logger.info("All required environment variables are verified (with Fallback support).")
+    logger.info("All critical environment variables are verified.")
+    logger.info("=================================")
 
 def create_app():
     app = Flask(__name__)
@@ -73,7 +99,9 @@ def create_app():
     # Configuration
     app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', '/tmp/uploads')
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-fallback')
+    
+    # Force SECRET_KEY to be what's in env, NO fallback in production for security
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
     # 8. Detailed Logging: Log all incoming requests for debugging
     @app.before_request
@@ -93,8 +121,16 @@ def create_app():
 
     @app.route("/health")
     def health():
+        config_status = {
+            "SECRET_KEY": "set" if os.getenv("SECRET_KEY") else "missing",
+            "GOOGLE_CLIENT_ID": "set" if os.getenv("GOOGLE_CLIENT_ID") else "missing",
+            "MONGO_URI": "set" if (os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")) else "missing",
+            "GEMINI_API_KEY": "set" if os.getenv("GEMINI_API_KEY") else "missing"
+        }
         return jsonify({
-            "status": "healthy"
+            "status": "healthy",
+            "config": config_status,
+            "environment": os.getenv("FLASK_ENV", "production")
         }), 200
 
     @app.route("/api")
@@ -137,13 +173,29 @@ def create_app():
     def test_gemini():
         try:
             from app.agents.fashion_chat_agent import FashionChatAgent
+            # We use a fresh instance to test initialization flow
             agent = FashionChatAgent()
-            result = agent.process("Hello, are you working?")
+            agent_status = agent.status
+            
+            # If initialized, try a simple connectivity test
+            test_response = None
+            if agent_status["initialized"]:
+                try:
+                    res = agent.process("Ping")
+                    test_response = "Success" if "response" in res and "Error" not in res.get("response", "") else "Failed"
+                except:
+                    test_response = "Failed"
+
             return jsonify({
-                "status": "connected",
-                "response": result
+                "gemini_key_present": agent_status["key_present"],
+                "gemini_client_initialized": agent_status["initialized"],
+                "model": agent_status["model"] or "gemini-1.5-flash",
+                "status": "ok" if agent_status["initialized"] and test_response == "Success" else "error",
+                "test_connectivity": test_response,
+                "error_details": agent_status["error"]
             }), 200
         except Exception as e:
+            logger.error(f"Debug Gemini endpoint failed: {e}", exc_info=True)
             return jsonify({
                 "status": "error",
                 "details": str(e)

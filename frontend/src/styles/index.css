@@ -3,7 +3,42 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+  
+  .dark {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-darker text-gray-100 m-0 p-0 font-sans;
+    @apply bg-page-light text-navy transition-colors duration-300 ease-in-out m-0 p-0 font-sans;
+  }
+
+  .dark body {
+    @apply bg-page-dark text-gray-100;
+  }
+
+  /* Smooth transitions for common elements */
+  * {
+    @apply transition-all duration-200 ease-in-out;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-card-dark rounded-xl shadow-soft dark:shadow-none dark:border dark:border-gray-800 p-6;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand to-purple-500 text-white font-medium px-6 py-2.5 rounded-full hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .sidebar-item {
+    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors;
+  }
+
+  .sidebar-item.active {
+    @apply bg-brand-light dark:bg-gray-800 text-brand dark:text-brand-light font-semibold;
   }
 }
