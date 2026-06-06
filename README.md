@@ -1,4 +1,4 @@
-# AI Trading and Portfolio Management Platform
+# AI FASHION
 
 ## Tech Stack
 - **Frontend**: React, Vite, Tailwind CSS, Axios, React Router
