@@ -149,6 +149,15 @@ def google_auth():
             "error": str(e)
         }), 500
 
+@auth_bp.route('/logout', methods=['POST'])
+@token_required
+def logout(current_user):
+    logger.info(f"User logged out: ID={str(current_user['_id'])}, Email={current_user['email']}, Time={datetime.utcnow()}")
+    return jsonify({
+        "success": True,
+        "message": "Logged out successfully"
+    }), 200
+
 @auth_bp.route('/me', methods=['GET'])
 @token_required
 def get_me(current_user):

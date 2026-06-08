@@ -86,10 +86,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      // Attempt to notify backend of logout
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Backend logout failed:', error);
+    } finally {
+      // Always clear local state even if backend call fails
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+    }
   };
 
   return (
