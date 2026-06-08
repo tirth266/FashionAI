@@ -37,10 +37,12 @@ def chat():
 @chat_bp.route('/health', methods=['GET'])
 def health():
     status = gemini_service.get_status()
-    # 8. Add endpoint: GET /api/chat/health Response: {"status":"healthy", "gemini_configured": true}
+    # 6. Add endpoint: GET /api/chat/health Response: {"gemini_configured": true, "model": "<active_model>"}
     return jsonify({
         "status": status["status"],
         "gemini_configured": status["gemini_configured"],
         "client_initialized": status["client_initialized"],
+        "model": status.get("active_model"),
+        "sdk_version": status.get("sdk_version"),
         "last_error": status.get("last_error")
     }), 200 if status["status"] == "healthy" else 503

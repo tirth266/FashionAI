@@ -16,11 +16,11 @@ class FashionChatAgent:
             if Config.GEMINI_API_KEY:
                 logger.info("Initializing Gemini API with GEMINI_API_KEY...")
                 genai.configure(api_key=Config.GEMINI_API_KEY)
-                # Use gemini-1.5-flash as default, it's fast and reliable
-                self._model = genai.GenerativeModel('gemini-1.5-flash')
+                # Use gemini-1.5-pro as default, it's fast and reliable
+                self._model = genai.GenerativeModel('gemini-1.5-pro')
                 self._initialized = True
                 self._init_error = None
-                logger.info("Gemini API initialized successfully with model: gemini-1.5-flash")
+                logger.info("Gemini API initialized successfully with model: gemini-1.5-pro")
             else:
                 self._initialized = False
                 self._init_error = "GEMINI_API_KEY is missing from environment"
@@ -67,6 +67,6 @@ class FashionChatAgent:
         return {
             "initialized": self._initialized,
             "key_present": bool(Config.GEMINI_API_KEY),
-            "model": "gemini-1.5-flash" if self._initialized else None,
+            "model": "gemini-1.5-pro" if self._initialized else None,
             "error": self._init_error
         }
