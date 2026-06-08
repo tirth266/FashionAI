@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import logging
 from app.core.config import Config
 
@@ -6,67 +7,85 @@ logger = logging.getLogger(__name__)
 
 class FashionChatAgent:
     def __init__(self):
-        self._model = None
+        self._client = None
         self._initialized = False
         self._init_error = None
+        self._active_model = None
         self.initialize()
 
     def initialize(self):
         try:
             if Config.GEMINI_API_KEY:
-                logger.info("Initializing Gemini API with GEMINI_API_KEY...")
-                genai.configure(api_key=Config.GEMINI_API_KEY)
-                # Use gemini-1.5-pro as default, it's fast and reliable
-                self._model = genai.GenerativeModel('gemini-1.5-pro')
-                self._initialized = True
-                self._init_error = None
-                logger.info("Gemini API initialized successfully with model: gemini-1.5-pro")
+                logger.info("Initializing FashionChatAgent with new google-genai SDK...")
+                self._client = genai.Client(api_key=Config.GEMINI_API_KEY)
+                
+                # Use primary models from Config or defaults
+                candidate_models = [Config.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-1.5-flash']
+                candidate_models = [m for m in candidate_models if m]
+                
+                selected = None
+                for model_name in candidate_models:
+                    try:
+                        # Test call
+                        self._client.models.generate_content(
+                            model=model_name,
+                            contents="ping",
+                            config=types.GenerateContentConfig(max_output_tokens=1)
+                        )
+                        selected = model_name
+                        break
+                    except:
+                        continue
+                
+                if not selected:
+                    # Discover
+                    for m in self._client.models.list():
+                        if 'generateContent' in m.supported_generation_methods:
+                            selected = m.name
+                            break
+                
+                if selected:
+                    self._active_model = selected
+                    self._initialized = True
+                    self._init_error = None
+                    logger.info(f"FashionChatAgent initialized with model: {self._active_model}")
+                else:
+                    self._initialized = False
+                    self._init_error = "No supported models found"
             else:
                 self._initialized = False
-                self._init_error = "GEMINI_API_KEY is missing from environment"
-                logger.error("Gemini API Initialization Failed: GEMINI_API_KEY not found in Config")
+                self._init_error = "GEMINI_API_KEY is missing"
         except Exception as e:
             self._initialized = False
             self._init_error = str(e)
-            logger.error(f"Gemini API Initialization Failed: {str(e)}", exc_info=True)
+            logger.error(f"FashionChatAgent Initialization Failed: {str(e)}", exc_info=True)
 
     def process(self, message):
-        # Lazy re-initialization if not initialized
         if not self._initialized:
-            logger.info("Attempting lazy re-initialization of Gemini API...")
             self.initialize()
 
-        if not self._initialized or not self._model:
-            error_msg = self._init_error or "Gemini API key not configured."
-            logger.error(f"Chat request failed: {error_msg}")
-            return {
-                "error": "Configuration Error",
-                "response": f"Gemini API is not properly configured: {error_msg}. Please check your GEMINI_API_KEY."
-            }
+        if not self._initialized or not self._client:
+            return {"response": f"Error: {self._init_error}"}
         
         try:
-            logger.info(f"Processing chat message: {message[:50]}...")
-            prompt = f"""
-            You are a professional AI Fashion Stylist for 'StylePulse'. 
-            Your goal is to provide creative, professional, and helpful fashion advice.
-            User: {message}
-            AI Stylist:"""
-            
-            response = self._model.generate_content(prompt)
-            if not response or not response.text:
-                logger.error("Gemini API returned an empty response")
-                return {"response": "I'm sorry, I couldn't generate a response. Please try again later."}
-                
-            return {"response": response.text}
+            response = self._client.models.generate_content(
+                model=self._active_model,
+                contents=f"User: {message}\nAI Stylist:",
+                config=types.GenerateContentConfig(
+                    system_instruction="You are StylePulse AI, a professional fashion stylist.",
+                    max_output_tokens=500
+                )
+            )
+            return {"response": response.text if response else "Empty response"}
         except Exception as e:
-            logger.error(f"Error interacting with Gemini: {str(e)}", exc_info=True)
-            return {"response": f"Error interacting with Gemini: {str(e)}"}
+            logger.error(f"Agent Chat Error ({self._active_model}): {str(e)}")
+            return {"response": f"Error: {str(e)}"}
 
     @property
     def status(self):
         return {
             "initialized": self._initialized,
             "key_present": bool(Config.GEMINI_API_KEY),
-            "model": "gemini-1.5-pro" if self._initialized else None,
+            "model": self._active_model,
             "error": self._init_error
         }
