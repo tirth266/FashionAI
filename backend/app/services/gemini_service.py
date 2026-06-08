@@ -41,8 +41,10 @@ Always:
             return True
         
         api_key = Config.GEMINI_API_KEY
+        logger.info(f"Attempting to initialize Gemini client. API Key present: {bool(api_key)}")
+        
         if not api_key:
-            logger.error("GEMINI_API_KEY is not configured")
+            logger.error("CRITICAL: GEMINI_API_KEY is missing from environment variables.")
             return False
             
         try:
@@ -52,17 +54,19 @@ Always:
                 system_instruction=self._system_instruction
             )
             self._initialized = True
-            logger.info("GeminiService initialized successfully")
+            logger.info("GeminiService initialized successfully using gemini-1.5-flash")
             return True
         except Exception as e:
-            logger.error(f"Failed to initialize GeminiService: {str(e)}")
+            self._init_error = str(e)
+            logger.error(f"Failed to initialize GeminiService: {self._init_error}", exc_info=True)
             return False
 
     def generate_response(self, message, history=None):
         if not self._initialize():
+            error_reason = "API Key missing" if not Config.GEMINI_API_KEY else getattr(self, '_init_error', 'Initialization failed')
             return {
                 "success": False,
-                "error": "Gemini API is not configured properly."
+                "error": f"Gemini API is not configured properly. Reason: {error_reason}"
             }
             
         if not message:
@@ -73,7 +77,6 @@ Always:
 
         try:
             # Format history for Gemini SDK if provided
-            # Gemini history format: [{"role": "user", "parts": ["..."]}, {"role": "model", "parts": ["..."]}]
             chat_history = []
             if history:
                 for msg in history:
@@ -82,7 +85,7 @@ Always:
 
             chat_session = self._model.start_chat(history=chat_history)
             
-            logger.info(f"Sending message to Gemini: {message[:50]}...")
+            logger.info(f"Sending message to Gemini (Length: {len(message)})")
             
             # Simple retry logic
             max_retries = 3
@@ -105,21 +108,22 @@ Always:
 
             return {
                 "success": False,
-                "error": "Failed to get a valid response from Gemini."
+                "error": "Failed to get a valid response from Gemini after retries."
             }
 
         except Exception as e:
             logger.error(f"Error in GeminiService.generate_response: {str(e)}", exc_info=True)
             return {
                 "success": False,
-                "error": f"An error occurred while communicating with the AI stylist: {str(e)}"
+                "error": f"Gemini API error: {str(e)}"
             }
 
     def get_status(self):
         return {
-            "status": "healthy" if self._initialized or Config.GEMINI_API_KEY else "error",
-            "gemini": "connected" if self._initialized else "not_initialized",
-            "api_key_configured": bool(Config.GEMINI_API_KEY)
+            "status": "healthy" if self._initialized else "error",
+            "gemini_configured": bool(Config.GEMINI_API_KEY),
+            "client_initialized": self._initialized,
+            "last_error": getattr(self, '_init_error', None) if not self._initialized else None
         }
 
 # Singleton instance

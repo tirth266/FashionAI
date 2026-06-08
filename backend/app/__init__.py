@@ -18,11 +18,12 @@ def validate_env_vars():
     critical_vars = [
         "GOOGLE_CLIENT_ID",
         "SECRET_KEY",
-        "MONGO_URI"
+        "MONGO_URI",
+        "GEMINI_API_KEY"
     ]
     optional_vars = [
-        "GEMINI_API_KEY",
-        "UPLOAD_FOLDER"
+        "UPLOAD_FOLDER",
+        "GEMINI_MODEL" # Example of an optional one
     ]
     
     logger.info("=== Environment Variable Audit ===")
