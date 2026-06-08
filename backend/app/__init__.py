@@ -172,27 +172,18 @@ def create_app():
     @app.route("/api/debug/gemini")
     def test_gemini():
         try:
-            from app.agents.fashion_chat_agent import FashionChatAgent
-            # We use a fresh instance to test initialization flow
-            agent = FashionChatAgent()
-            agent_status = agent.status
+            from app.services.gemini_service import gemini_service
+            # Test connectivity
+            res = gemini_service.generate_response("Ping")
+            status = gemini_service.get_status()
             
-            # If initialized, try a simple connectivity test
-            test_response = None
-            if agent_status["initialized"]:
-                try:
-                    res = agent.process("Ping")
-                    test_response = "Success" if "response" in res and "Error" not in res.get("response", "") else "Failed"
-                except:
-                    test_response = "Failed"
-
             return jsonify({
-                "gemini_key_present": agent_status["key_present"],
-                "gemini_client_initialized": agent_status["initialized"],
-                "model": agent_status["model"] or "gemini-1.5-flash",
-                "status": "ok" if agent_status["initialized"] and test_response == "Success" else "error",
-                "test_connectivity": test_response,
-                "error_details": agent_status["error"]
+                "gemini_key_present": status["api_key_configured"],
+                "gemini_client_initialized": status["gemini"] == "connected",
+                "status": "ok" if res.get("success") else "error",
+                "test_connectivity": "Success" if res.get("success") else "Failed",
+                "response": res.get("response"),
+                "error_details": res.get("error")
             }), 200
         except Exception as e:
             logger.error(f"Debug Gemini endpoint failed: {e}", exc_info=True)
