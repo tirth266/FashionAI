@@ -67,12 +67,15 @@ def get_recommendations():
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-@recommendations_bp.route('/similar', methods=['POST'])
+@recommendations_bp.route('/similar', methods=['POST', 'OPTIONS'])
 def recommend_similar():
     """
     POST /api/recommendations/similar
     Receives an image and returns top 5 visually similar products.
     """
+    if request.method == "OPTIONS":
+        return "", 200
+        
     if 'image' not in request.files:
         return jsonify({"success": False, "error": "No image file provided"}), 400
     
@@ -81,12 +84,22 @@ def recommend_similar():
     if image_file.filename == '':
         return jsonify({"success": False, "error": "No selected file"}), 400
 
+    # 1. Image Size & Format Validation
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'webp'}
+    if '.' not in image_file.filename or image_file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return jsonify({"success": False, "error": "Invalid file format. Allowed: PNG, JPG, JPEG, WEBP"}), 400
+
+    # Optional: File size checking (requires reading stream or checking content-length)
+    if request.content_length and request.content_length > 5 * 1024 * 1024:
+        return jsonify({"success": False, "error": "File too large. Maximum size is 5MB."}), 413
+
     try:
-        # 1. Extract visual features using RegNet
-        logger.info(f"Extracting features for uploaded image: {image_file.filename}")
+        # 2. Extract visual features using RegNet
+        logger.info(f"Extracting features for uploaded image: {image_file.filename} ({request.content_length} bytes)")
         query_embedding = fashion_similarity_service.extract_features(image_file)
         
-        # 2. Search FAISS index for top 5 matches
+        # 3. Search FAISS index for top 5 matches
+        logger.info("Searching FAISS index for similar products...")
         recommendations = faiss_service.search_similar(query_embedding, top_k=5)
         
         # Bonus: Add category, colors, and tags (heuristic/mock for now)

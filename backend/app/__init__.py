@@ -55,14 +55,13 @@ def create_app():
     CORS(
         app,
         resources={
-            r"/api/*": {
+            r"/*": {
                 "origins": [
                     "https://fashion-ai-sand.vercel.app",
-                    "http://localhost:5173"
+                    "http://localhost:5173",
+                    "http://localhost:3000"
                 ]
-            },
-            r"/health": {"origins": "*"},
-            r"/": {"origins": "*"}
+            }
         },
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept"],
@@ -87,7 +86,20 @@ def create_app():
 
     @app.route("/health")
     def health():
-        return jsonify({"status": "healthy", "environment": os.getenv("FLASK_ENV", "production")}), 200
+        config_status = {
+            "SECRET_KEY": "set" if os.getenv("SECRET_KEY") else "missing",
+            "GOOGLE_CLIENT_ID": "set" if os.getenv("GOOGLE_CLIENT_ID") else "missing",
+            "MONGO_URI": "set" if (os.getenv("MONGO_URI") or os.getenv("MONGODB_URI")) else "missing",
+            "GEMINI_API_KEY": "set" if os.getenv("GEMINI_API_KEY") else "missing"
+        }
+        return jsonify({
+            "status": "ok",
+            "google_auth": bool(os.getenv("GOOGLE_CLIENT_ID")),
+            "gemini": bool(os.getenv("GEMINI_API_KEY")),
+            "recommendation_service": True,
+            "environment": os.getenv("FLASK_ENV", "production"),
+            "config": config_status
+        }), 200
 
     @app.route("/api")
     def api_root():
@@ -130,14 +142,52 @@ def create_app():
         logger.info("================================\n")
 
     # 8. Error Handlers
+    @app.errorhandler(400)
+    def bad_request(e):
+        return jsonify({"error": "Bad Request", "details": str(e)}), 400
+
+    @app.errorhandler(401)
+    def unauthorized(e):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return jsonify({"error": "Forbidden"}), 403
+
     @app.errorhandler(404)
     def not_found(e):
         return jsonify({"error": "Not Found", "path": request.path}), 404
+        
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        return jsonify({"error": "Method Not Allowed"}), 405
+        
+    @app.errorhandler(413)
+    def request_entity_too_large(e):
+        return jsonify({"error": "Payload Too Large"}), 413
+        
+    @app.errorhandler(429)
+    def too_many_requests(e):
+        return jsonify({"error": "Too Many Requests"}), 429
 
     @app.errorhandler(500)
     def server_error(e):
         logger.error(f"500 ERROR: {e}", exc_info=True)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
+    @app.after_request
+    def guarantee_cors(response):
+        origin = request.headers.get('Origin')
+        allowed_origins = ["https://fashion-ai-sand.vercel.app", "http://localhost:5173", "http://localhost:3000"]
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        else:
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept'
+        return response
 
     return app
 

@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Sending Google Token to Backend:', googleAuthUrl);
       
-      const response = await axios.post(googleAuthUrl, { token: credential });
+      const response = await api.post('/auth/google', { token: credential });
       const { user, token: newToken } = response.data;
       
       console.log('Backend authentication successful');

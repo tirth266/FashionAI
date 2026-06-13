@@ -5,6 +5,10 @@ from PIL import Image
 import numpy as np
 import logging
 import os
+import gc
+
+# Optimize PyTorch CPU memory usage
+torch.set_num_threads(1)
 
 logger = logging.getLogger(__name__)
 
@@ -34,19 +38,10 @@ class FashionSimilarityService:
         ])
         self._initialized = True
 
-    @property
-    def model(self):
-        """Lazy load the model when first needed to save startup memory."""
-        if self._model is None:
-            self._load_model()
-        return self._model
-
     def _load_model(self):
         try:
-            logger.info("Lazy loading RegNet-Y-16GF model...")
-            # Load pretrained RegNet-Y-16GF
+            logger.info("Loading RegNet-Y-16GF model into memory...")
             model = models.regnet_y_16gf(weights=models.RegNet_Y_16GF_Weights.IMAGENET1K_V2)
-            # Remove the classification head
             model.fc = nn.Identity()
             model.to(self.device)
             model.eval()
@@ -61,21 +56,35 @@ class FashionSimilarityService:
         Extract normalized embedding vector from an image file.
         """
         try:
+            # 1. Load model right before extraction
+            if self._model is None:
+                self._load_model()
+                
+            # 2. Process image
             image = Image.open(image_file).convert('RGB')
             img_tensor = self.transform(image).unsqueeze(0).to(self.device)
             
+            # 3. Extract features
             with torch.no_grad():
-                features = self.model(img_tensor) # Uses the lazy-loading property
+                features = self._model(img_tensor)
             
-            # Convert to numpy and normalize
+            # 4. Normalize
             embedding = features.cpu().numpy().flatten()
             norm = np.linalg.norm(embedding)
             if norm > 0:
                 embedding = embedding / norm
                 
+            # 5. MEMORY OPTIMIZATION: Unload model to prevent Render OOM on 512MB instances
+            logger.info("Unloading RegNet model from memory to save RAM...")
+            del self._model
+            self._model = None
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                
             return embedding
         except Exception as e:
-            logger.error(f"Feature extraction failed: {str(e)}")
+            logger.error(f"Feature extraction failed: {str(e)}", exc_info=True)
             raise
 
 fashion_similarity_service = FashionSimilarityService()
