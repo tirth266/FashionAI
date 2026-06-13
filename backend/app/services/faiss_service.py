@@ -50,7 +50,13 @@ class FAISSService:
         if not FAISS_AVAILABLE or self._index is None:
             return
 
-        data_path = os.path.join(os.getcwd(), 'backend', 'data', 'product_embeddings.json')
+        # Use relative path from project root (which is 'backend' on Render)
+        data_path = os.path.join(os.getcwd(), 'data', 'product_embeddings.json')
+        
+        # Fallback for local development if running from root
+        if not os.path.exists(data_path):
+            data_path = os.path.join(os.getcwd(), 'backend', 'data', 'product_embeddings.json')
+            
         if not os.path.exists(data_path):
             logger.warning(f"Product embeddings file not found at {data_path}")
             return

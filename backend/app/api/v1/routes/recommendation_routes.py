@@ -48,30 +48,39 @@ def recommend_similar():
     if request.method == "OPTIONS":
         return "", 200
         
+    logger.info("SIMILAR RECOMMENDATIONS ENDPOINT HIT")
+    
     if 'image' not in request.files:
+        logger.warning("No image file in request.files")
         return jsonify({"success": False, "error": "No image file provided"}), 400
     
     image_file = request.files['image']
+    logger.info(f"Received file: {image_file.filename}")
     
     if image_file.filename == '':
+        logger.warning("Empty filename")
         return jsonify({"success": False, "error": "No selected file"}), 400
 
     # 1. Image Size & Format Validation
     allowed_extensions = {'png', 'jpg', 'jpeg', 'webp'}
     if '.' not in image_file.filename or image_file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        logger.warning(f"Invalid file format: {image_file.filename}")
         return jsonify({"success": False, "error": "Invalid file format. Allowed: PNG, JPG, JPEG, WEBP"}), 400
 
     if request.content_length and request.content_length > 5 * 1024 * 1024:
+        logger.warning(f"File too large: {request.content_length} bytes")
         return jsonify({"success": False, "error": "File too large. Maximum size is 5MB."}), 413
 
     try:
         # 2. Extract visual features using deep learning
         logger.info(f"Extracting features for uploaded image: {image_file.filename}")
         query_embedding = fashion_similarity_service.extract_features(image_file)
+        logger.info(f"Feature extraction successful. Vector size: {len(query_embedding)}")
         
         # 3. Search FAISS index for matches
         logger.info("Searching FAISS index...")
         recommendations = faiss_service.search_similar(query_embedding, top_k=5)
+        logger.info(f"FAISS search returned {len(recommendations)} matches")
         
         # Bonus: Add heuristic metadata
         for rec in recommendations:
@@ -100,6 +109,7 @@ def recommend_similar():
             if 'red' in name_lower: colors.append('Red')
             rec['colors'] = colors if colors else ['Multicolor']
 
+        logger.info(f"Returning {len(recommendations)} recommendations to frontend")
         return jsonify({
             "success": True,
             "recommendations": recommendations,

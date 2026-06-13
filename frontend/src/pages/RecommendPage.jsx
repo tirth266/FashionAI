@@ -26,22 +26,35 @@ export const RecommendPage = () => {
   };
 
   const getRecommendations = async () => {
-    if (!selectedImage) return;
+    if (!selectedImage) {
+      console.log('No image selected');
+      return;
+    }
+
+    console.log('Analyze My Style clicked');
+    console.log('Selected image:', selectedImage.name, selectedImage.size, selectedImage.type);
 
     setLoading(true);
     setError(null);
 
     try {
+      console.log('Calling uploadFashionImage...');
       const data = await uploadFashionImage(selectedImage);
+      console.log('API Response received:', data);
+      
       if (data.success) {
+        console.log('Recommendations found:', data.recommendations?.length || 0);
+        console.log('Recommendations data:', data.recommendations);
         setRecommendations(data.recommendations || []);
       } else {
+        console.error('API reported failure:', data.error);
         setError(data.error || 'Failed to get recommendations.');
       }
     } catch (err) {
-      console.error('Error fetching recommendations:', err);
+      console.error('Error in getRecommendations catch block:', err);
       setError(err.error || 'Failed to get recommendations. Please try again.');
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
@@ -130,6 +143,27 @@ export const RecommendPage = () => {
 
           {!loading && recommendations.length > 0 && (
             <RecommendationGrid recommendations={recommendations} />
+          )}
+
+          {!loading && recommendations.length === 0 && selectedImage && !error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-12 text-center p-8 bg-white rounded-2xl border border-gray-100 shadow-sm max-w-2xl mx-auto"
+            >
+              <Sparkles className="mx-auto text-gray-300 mb-4" size={48} />
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No Matches Found</h3>
+              <p className="text-gray-500 mb-6">
+                We couldn't find any close matches for this item in our current database. 
+                Try uploading a different photo or an item with clearer patterns.
+              </p>
+              <button
+                onClick={getRecommendations}
+                className="text-black font-bold uppercase tracking-widest text-xs border-b-2 border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-all"
+              >
+                Try Analysis Again
+              </button>
+            </motion.div>
           )}
         </main>
       </div>
