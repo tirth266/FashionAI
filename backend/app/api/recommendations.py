@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from app.services.recommendation_service import RecommendationService
 from app.services.fashion_similarity_service import fashion_similarity_service
 from app.services.faiss_service import faiss_service
 from app.middleware.jwt_required import jwt_required
@@ -10,62 +9,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 recommendations_bp = Blueprint('recommendations', __name__)
-# Initialize service (this will load the model and index fashion items)
-recommender = RecommendationService()
 
 @recommendations_bp.route('/recommend', methods=['POST', 'OPTIONS'])
 @jwt_required
 def get_recommendations():
-    # Log for CORS debugging
-    logger.info(f"Recommendation Request - Method: {request.method}")
-    logger.info(f"Recommendation Request - Origin: {request.headers.get('Origin')}")
-
-    if 'image' not in request.files:
-        return jsonify({"success": False, "error": "No image uploaded"}), 400
-    
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({"success": False, "error": "No image selected"}), 400
-    
-    # Save file temporarily
-    upload_dir = os.path.join(os.getcwd(), 'temp_uploads')
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir)
+    if request.method == "OPTIONS":
+        return "", 200
         
-    filename = werkzeug.utils.secure_filename(file.filename)
-    temp_path = os.path.join(upload_dir, filename)
-    file.save(temp_path)
-    
-    try:
-        # Get top 5 recommendations
-        results = recommender.recommend(temp_path, k=5)
-        
-        formatted_recommendations = []
-        for item in results:
-            formatted_recommendations.append({
-                "id": str(item.get("_id")),
-                "name": item.get("name"),
-                "category": item.get("category"),
-                "brand": item.get("brand"),
-                "price": item.get("price"),
-                "similarity": round(float(item.get("similarity_score", 0)), 2),
-                "imageUrl": item.get("imageUrl") or item.get("image_url")
-            })
-            
-        return jsonify({
-            "success": True,
-            "recommendations": formatted_recommendations
-        }), 200
-    except Exception as e:
-        logger.error(f"Error in recommendation engine: {str(e)}", exc_info=True)
-        return jsonify({
-            "success": False, 
-            "error": "Detailed error message: " + str(e),
-            "details": "The recommendation engine encountered an internal server error."
-        }), 500
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    # Legacy endpoint deprecated to save memory on 512MB instances.
+    return jsonify({
+        "success": False,
+        "error": "This endpoint is deprecated.",
+        "details": "Please use POST /api/recommendations/similar for the new memory-optimized recommendation engine."
+    }), 410
 
 @recommendations_bp.route('/similar', methods=['POST', 'OPTIONS'])
 def recommend_similar():

@@ -20,7 +20,7 @@ class FAISSService:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, dimension=3024):
+    def __init__(self, dimension=960):
         if self._initialized:
             return
             
