@@ -25,23 +25,29 @@ class FAISSService:
             return
             
         self.dimension = dimension
-        if FAISS_AVAILABLE:
-            self.index = faiss.IndexFlatIP(dimension) # Inner Product for Cosine Similarity (on normalized vectors)
-        else:
-            self.index = None
-            logger.warning("FAISS not found. Vector search is disabled.")
-            
+        self._index = None
         self.product_data = [] # To store metadata mapping to index
         self._initialized = True
         
-        # Load initial products if available
-        self.build_index()
+        # We NO LONGER call build_index() here to save startup memory
+        # It will be called lazily when search_similar is called
+
+    @property
+    def index(self):
+        """Lazy access to the FAISS index."""
+        if self._index is None:
+            if FAISS_AVAILABLE:
+                self._index = faiss.IndexFlatIP(self.dimension)
+                self.build_index()
+            else:
+                logger.warning("FAISS not found. Vector search is disabled.")
+        return self._index
 
     def build_index(self):
         """
         Loads products from product_embeddings.json and builds the FAISS index.
         """
-        if not FAISS_AVAILABLE:
+        if not FAISS_AVAILABLE or self._index is None:
             return
 
         data_path = os.path.join(os.getcwd(), 'backend', 'data', 'product_embeddings.json')
@@ -67,9 +73,8 @@ class FAISSService:
             
             embeddings_np = np.array(embeddings).astype('float32')
             
-            # Re-initialize index to clear old data
-            self.index = faiss.IndexFlatIP(self.dimension)
-            self.index.add(embeddings_np)
+            # Add to index
+            self._index.add(embeddings_np)
             
             logger.info(f"FAISS Index built with {len(self.product_data)} products.")
         except Exception as e:
@@ -79,7 +84,7 @@ class FAISSService:
         """
         Search for top_k similar products.
         """
-        if self.index.ntotal == 0:
+        if self.index is None or self.index.ntotal == 0:
             return []
 
         try:

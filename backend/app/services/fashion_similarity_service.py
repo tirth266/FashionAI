@@ -22,7 +22,7 @@ class FashionSimilarityService:
             return
             
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = None
+        self._model = None
         self.transform = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
@@ -32,18 +32,25 @@ class FashionSimilarityService:
                 std=[0.229, 0.224, 0.225]
             )
         ])
-        self._load_model()
         self._initialized = True
+
+    @property
+    def model(self):
+        """Lazy load the model when first needed to save startup memory."""
+        if self._model is None:
+            self._load_model()
+        return self._model
 
     def _load_model(self):
         try:
-            logger.info("Loading RegNet-Y-16GF model...")
+            logger.info("Lazy loading RegNet-Y-16GF model...")
             # Load pretrained RegNet-Y-16GF
-            self.model = models.regnet_y_16gf(weights=models.RegNet_Y_16GF_Weights.IMAGENET1K_V2)
+            model = models.regnet_y_16gf(weights=models.RegNet_Y_16GF_Weights.IMAGENET1K_V2)
             # Remove the classification head
-            self.model.fc = nn.Identity()
-            self.model.to(self.device)
-            self.model.eval()
+            model.fc = nn.Identity()
+            model.to(self.device)
+            model.eval()
+            self._model = model
             logger.info(f"Model loaded successfully on {self.device}")
         except Exception as e:
             logger.error(f"Failed to load model: {str(e)}")
@@ -58,7 +65,7 @@ class FashionSimilarityService:
             img_tensor = self.transform(image).unsqueeze(0).to(self.device)
             
             with torch.no_grad():
-                features = self.model(img_tensor)
+                features = self.model(img_tensor) # Uses the lazy-loading property
             
             # Convert to numpy and normalize
             embedding = features.cpu().numpy().flatten()
