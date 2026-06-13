@@ -3,9 +3,10 @@ from datetime import datetime
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from app.models.user_model import User
-from app.core.security import create_token
+from app.core.security import create_token, decode_token
 from app.core.config import Config
 from app.middleware.auth_middleware import token_required
+from bson import ObjectId
 import logging
 
 logger = logging.getLogger(__name__)
@@ -149,19 +150,40 @@ def google_auth():
             "error": str(e)
         }), 500
 
-@auth_bp.route('/logout', methods=['POST'])
-@token_required
-def logout(current_user):
-    logger.info(f"User logged out: ID={str(current_user['_id'])}, Email={current_user['email']}, Time={datetime.utcnow()}")
+@auth_bp.route('/logout', methods=['POST', 'OPTIONS'])
+def logout():
+    if request.method == "OPTIONS":
+        return "", 200
+        
+    # Attempt to log out gracefully even if token is invalid
+    token = request.headers.get('Authorization')
+    if token:
+        try:
+            token_str = token.split(" ")[1] if " " in token else token
+            payload = decode_token(token_str)
+            if payload and "user_id" in payload:
+                user = User.get_collection().find_one({"_id": ObjectId(payload["user_id"])})
+                if user:
+                    logger.info(f"User logged out: ID={str(user['_id'])}, Email={user['email']}, Time={datetime.utcnow()}")
+        except Exception:
+            pass # Ignore decoding errors during logout
+
     return jsonify({
         "success": True,
         "message": "Logged out successfully"
     }), 200
 
-@auth_bp.route('/me', methods=['GET'])
+@auth_bp.route('/me', methods=['GET', 'OPTIONS'])
 @token_required
 def get_me(current_user):
+    if request.method == "OPTIONS":
+        return "", 200
+        
+    if not current_user:
+         return jsonify({"success": False, "message": "User not authenticated"}), 401
+
     return jsonify({
+        "success": True,
         "user": {
             "email": current_user['email'],
             "name": current_user.get('name'),

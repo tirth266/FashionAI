@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.recommendation_service import RecommendationService
+from app.services.fashion_similarity_service import fashion_similarity_service
+from app.services.faiss_service import faiss_service
 from app.middleware.jwt_required import jwt_required
 import os
 import werkzeug
@@ -55,10 +57,81 @@ def get_recommendations():
             "recommendations": formatted_recommendations
         }), 200
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        logger.error(f"Error in recommendation engine: {str(e)}", exc_info=True)
+        return jsonify({
+            "success": False, 
+            "error": "Detailed error message: " + str(e),
+            "details": "The recommendation engine encountered an internal server error."
+        }), 500
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
+
+@recommendations_bp.route('/similar', methods=['POST'])
+def recommend_similar():
+    """
+    POST /api/recommendations/similar
+    Receives an image and returns top 5 visually similar products.
+    """
+    if 'image' not in request.files:
+        return jsonify({"success": False, "error": "No image file provided"}), 400
+    
+    image_file = request.files['image']
+    
+    if image_file.filename == '':
+        return jsonify({"success": False, "error": "No selected file"}), 400
+
+    try:
+        # 1. Extract visual features using RegNet
+        logger.info(f"Extracting features for uploaded image: {image_file.filename}")
+        query_embedding = fashion_similarity_service.extract_features(image_file)
+        
+        # 2. Search FAISS index for top 5 matches
+        recommendations = faiss_service.search_similar(query_embedding, top_k=5)
+        
+        # Bonus: Add category, colors, and tags (heuristic/mock for now)
+        for rec in recommendations:
+            name_lower = rec['name'].lower()
+            if 'hoodie' in name_lower:
+                rec['category'] = 'Hoodie'
+                rec['tags'] = ['Streetwear', 'Casual', 'Winter']
+            elif 'tee' in name_lower or 'shirt' in name_lower:
+                rec['category'] = 'T-Shirt'
+                rec['tags'] = ['Essential', 'Summer', 'Casual']
+            elif 'jeans' in name_lower:
+                rec['category'] = 'Pants'
+                rec['tags'] = ['Denim', 'Classic', 'All-season']
+            elif 'sneakers' in name_lower or 'shoes' in name_lower:
+                rec['category'] = 'Footwear'
+                rec['tags'] = ['Athletic', 'Trendy', 'Comfort']
+            else:
+                rec['category'] = 'Fashion'
+                rec['tags'] = ['Style', 'Modern']
+            
+            # Mock color extraction
+            colors = []
+            if 'black' in name_lower: colors.append('Black')
+            if 'white' in name_lower: colors.append('White')
+            if 'blue' in name_lower: colors.append('Blue')
+            if 'red' in name_lower: colors.append('Red')
+            rec['colors'] = colors if colors else ['Multicolor']
+
+        return jsonify({
+            "success": True,
+            "recommendations": recommendations,
+            "analysis": {
+                "detected_category": recommendations[0]['category'] if recommendations else "Unknown",
+                "style_detected": "Modern/Casual"
+            }
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error in similar recommendations: {str(e)}", exc_info=True)
+        return jsonify({
+            "success": False,
+            "error": "Failed to process image and find recommendations",
+            "details": str(e)
+        }), 500
 
 @recommendations_bp.route('/recommendations', methods=['GET'])
 def list_recommendations():

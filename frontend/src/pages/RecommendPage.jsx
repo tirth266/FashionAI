@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../services/api';
+import { uploadFashionImage } from '../services/recommendationService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
 import UploadImage from '../components/recommendation/UploadImage';
@@ -31,19 +31,16 @@ export const RecommendPage = () => {
     setLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('image', selectedImage);
-
     try {
-      const response = await api.post('/recommendations/recommend', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setRecommendations(response.data.recommendations || []);
+      const data = await uploadFashionImage(selectedImage);
+      if (data.success) {
+        setRecommendations(data.recommendations || []);
+      } else {
+        setError(data.error || 'Failed to get recommendations.');
+      }
     } catch (err) {
       console.error('Error fetching recommendations:', err);
-      setError(err.response?.data?.message || 'Failed to get recommendations. Please try again.');
+      setError(err.error || 'Failed to get recommendations. Please try again.');
     } finally {
       setLoading(false);
     }

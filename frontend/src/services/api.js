@@ -11,6 +11,7 @@ const baseURL = API_URL.endsWith('/api') ? API_URL : `${API_URL.replace(/\/$/, '
 
 export const api = axios.create({
   baseURL: baseURL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }

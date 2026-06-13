@@ -1,12 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const LoadingState = () => {
+  const steps = [
+    "Uploading Image",
+    "Extracting Features",
+    "Running RegNet Model",
+    "Finding Similar Products",
+    "Generating Results"
+  ];
+
+  const [currentStep, setCurrentStep] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [steps.length]);
+
   return (
-    <div className="mt-16">
+    <div className="mt-16 max-w-4xl mx-auto">
       <div className="flex flex-col items-center mb-12">
-        <div className="h-4 w-32 bg-gray-200 animate-pulse rounded-full mb-3"></div>
-        <div className="h-10 w-64 bg-gray-200 animate-pulse rounded-lg"></div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-black text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
+        >
+          Analyzing Style...
+        </motion.div>
+        
+        <div className="space-y-4 w-full max-w-xs">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ 
+                opacity: index <= currentStep ? 1 : 0.3,
+                x: 0,
+                color: index === currentStep ? '#000' : index < currentStep ? '#666' : '#999'
+              }}
+              className="flex items-center gap-3 text-sm font-medium"
+            >
+              {index < currentStep ? (
+                <CheckCircle2 className="text-green-500" size={18} />
+              ) : index === currentStep ? (
+                <Loader2 className="animate-spin text-black" size={18} />
+              ) : (
+                <div className="w-[18px] h-[18px] rounded-full border-2 border-gray-200" />
+              )}
+              {step}
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -23,17 +70,6 @@ const LoadingState = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="mt-12 flex flex-col items-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-black border-t-transparent rounded-full mb-4"
-        />
-        <p className="text-gray-500 text-sm font-medium animate-pulse">
-          AI is analyzing your style and searching for matches...
-        </p>
       </div>
     </div>
   );

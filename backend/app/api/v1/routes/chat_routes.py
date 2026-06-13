@@ -5,8 +5,11 @@ import logging
 logger = logging.getLogger(__name__)
 chat_bp = Blueprint('chat_bp', __name__)
 
-@chat_bp.route('/', methods=['POST'])
+@chat_bp.route('/', methods=['POST', 'OPTIONS'], strict_slashes=False)
 def chat():
+    if request.method == "OPTIONS":
+        return "", 200
+        
     try:
         data = request.get_json()
         if not data:

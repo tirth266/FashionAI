@@ -10,14 +10,14 @@ const RecommendationCard = ({ product, index }) => {
     }).format(price);
   };
 
-  const similarityPercentage = (product.similarity_score * 100).toFixed(1);
+  const similarityPercentage = product.similarity ? product.similarity.toFixed(1) : "0.0";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100"
+      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 flex flex-col h-full"
     >
       <div className="relative aspect-[3/4] overflow-hidden">
         <img
@@ -36,29 +36,27 @@ const RecommendationCard = ({ product, index }) => {
         
         <div className="absolute bottom-4 left-4">
           <div className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            {similarityPercentage}% Match
+            Match: {similarityPercentage}%
           </div>
         </div>
       </div>
       
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold mb-1">
-              {product.brand} • {product.category}
-            </p>
-            <h3 className="text-gray-900 font-medium text-lg leading-tight group-hover:text-black transition-colors">
-              {product.name}
-            </h3>
-          </div>
+      <div className="p-5 flex flex-col flex-1">
+        <div className="mb-auto">
+          <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold mb-1">
+            {product.brand}
+          </p>
+          <h3 className="text-gray-900 font-medium text-base leading-tight group-hover:text-black transition-colors line-clamp-2">
+            {product.name}
+          </h3>
         </div>
         
         <div className="flex items-center justify-between mt-4">
-          <span className="text-xl font-bold text-gray-900">
+          <span className="text-lg font-bold text-gray-900">
             {formatPrice(product.price)}
           </span>
-          <button className="text-sm font-semibold text-black border-b-2 border-black/10 hover:border-black transition-all pb-0.5">
-            View Details
+          <button className="bg-black text-white text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-wider hover:bg-gray-800 transition-colors">
+            View Product
           </button>
         </div>
       </div>

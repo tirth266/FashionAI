@@ -79,6 +79,19 @@ def create_app():
             logger.info(f"{rule.endpoint:40s} {','.join(rule.methods):20s} {rule.rule}")
         logger.info("=========================\n")
 
+        # 3. Log available Gemini models at startup
+        try:
+            from app.services.gemini_service import gemini_service
+            models = gemini_service.list_available_models()
+            model_names = [m['name'] for m in models]
+            logger.info(f"STARTUP: Available Gemini Models: {', '.join(model_names)}")
+            
+            # Initializing service to select active model
+            gemini_service._initialize()
+            logger.info(f"STARTUP: Active Gemini Model: {gemini_service._active_model_name}")
+        except Exception as e:
+            logger.error(f"STARTUP: Failed to log Gemini models: {str(e)}")
+
     # 2 & 3. Fix CORS: Production-ready configuration with explicit resource mapping
     CORS(
         app,
@@ -234,16 +247,6 @@ def create_app():
     
     @app.after_request
     def add_security_headers(response):
-        # Ensure CORS headers are present even for error responses
-        if 'Access-Control-Allow-Origin' not in response.headers:
-            origin = request.headers.get('Origin')
-            if origin in ["https://fashion-ai-sand.vercel.app", "http://localhost:5173"]:
-                response.headers['Access-Control-Allow-Origin'] = origin
-                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-                response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-                response.headers['Access-Control-Allow-Credentials'] = 'true'
-        
-        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
         return response
 
     return app
