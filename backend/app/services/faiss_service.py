@@ -1,4 +1,9 @@
-import faiss
+try:
+    import faiss
+    FAISS_AVAILABLE = True
+except ImportError:
+    FAISS_AVAILABLE = False
+
 import numpy as np
 import json
 import os
@@ -20,7 +25,12 @@ class FAISSService:
             return
             
         self.dimension = dimension
-        self.index = faiss.IndexFlatIP(dimension) # Inner Product for Cosine Similarity (on normalized vectors)
+        if FAISS_AVAILABLE:
+            self.index = faiss.IndexFlatIP(dimension) # Inner Product for Cosine Similarity (on normalized vectors)
+        else:
+            self.index = None
+            logger.warning("FAISS not found. Vector search is disabled.")
+            
         self.product_data = [] # To store metadata mapping to index
         self._initialized = True
         
@@ -31,6 +41,9 @@ class FAISSService:
         """
         Loads products from product_embeddings.json and builds the FAISS index.
         """
+        if not FAISS_AVAILABLE:
+            return
+
         data_path = os.path.join(os.getcwd(), 'backend', 'data', 'product_embeddings.json')
         if not os.path.exists(data_path):
             logger.warning(f"Product embeddings file not found at {data_path}")
