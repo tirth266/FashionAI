@@ -114,7 +114,7 @@ def create_app():
 
     # 6. Blueprint Registration
     blueprints = [
-        ('app.api.recommendations', 'recommendations_bp', '/api/recommendations'),
+        ('app.api.v1.routes.recommendation_routes', 'recommendation_bp', '/api/recommendations'),
         ('app.api.uploads', 'uploads_bp', '/api'),
         ('app.api.v1.routes.auth_routes', 'auth_bp', '/api/auth'),
         ('app.api.v1.routes.chat_routes', 'chat_bp', '/api/chat'),
