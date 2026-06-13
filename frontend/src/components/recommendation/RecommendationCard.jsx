@@ -3,13 +3,6 @@ import { ExternalLink, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const RecommendationCard = ({ product, index }) => {
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
-
   const similarityPercentage = product.similarity ? product.similarity.toFixed(1) : "0.0";
 
   return (
@@ -51,11 +44,8 @@ const RecommendationCard = ({ product, index }) => {
           </h3>
         </div>
         
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-lg font-bold text-gray-900">
-            {formatPrice(product.price)}
-          </span>
-          <button className="bg-black text-white text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-wider hover:bg-gray-800 transition-colors">
+        <div className="flex items-center justify-center mt-4">
+          <button className="w-full bg-black text-white text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-wider hover:bg-gray-800 transition-colors">
             View Product
           </button>
         </div>

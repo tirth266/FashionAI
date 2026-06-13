@@ -73,8 +73,8 @@ class FAISSService:
             
             for p in products:
                 embeddings.append(p['embedding'])
-                # Store metadata excluding embedding for response
-                metadata = {k: v for k, v in p.items() if k != 'embedding'}
+                # Store metadata excluding embedding and price for response
+                metadata = {k: v for k, v in p.items() if k not in ['embedding', 'price']}
                 self.product_data.append(metadata)
             
             embeddings_np = np.array(embeddings).astype('float32')
